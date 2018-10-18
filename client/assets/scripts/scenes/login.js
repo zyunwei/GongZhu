@@ -7,6 +7,7 @@ cc.Class({
     properties: {},
     start() {
         global.net.init();
+        global.loginInfo = {};
     },
     update(dt) {
     },

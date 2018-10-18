@@ -22,6 +22,16 @@ const userManager = {
             console.log("当前用户数：" + global.onlineUsers.length);
         }
     },
+    getCurrentUser(socketId){
+        // 取得当前用户信息
+        let onlineUser = null;
+        global.onlineUsers.some(function (e, i) {
+            if (e.socketId == socketId) {
+                onlineUser = e;
+            }
+        });
+        return onlineUser;
+    },
     userDisconnect(socketId) {
         // 用户网络断开处理
         let flag = -1;

@@ -3,24 +3,21 @@ cc.Class({
 
     properties: {
         Title: cc.Label,
-        Text: cc.Label
+        Content: cc.Label
     },
     okCallback:undefined,
     init(title, text, callback) {
         this.Title.string = title;
-        this.Text.string = text;
+        this.Content.string = text;
         this.okCallback = callback;
     },
     start() {
 
     },
-    close: function (event, customEventData) {
-        this.node.destroy();
-    },
     ok: function (event, customEventData) {
         if(typeof(this.okCallback) != "undefined"){
             this.okCallback();
         }
-        else this.node.destroy();
+        this.node.destroy();
     }
 });

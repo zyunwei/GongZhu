@@ -2,6 +2,7 @@ import net from 'net.js'
 
 const global = {};
 global.net = net();
+global.loginInfo = {};
 
 global.testUserInfo1 ={
     unionId: '10000',
