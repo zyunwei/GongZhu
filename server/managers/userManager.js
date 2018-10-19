@@ -3,24 +3,17 @@ import global from "../global";
 
 const userManager = {
     checkOnlineUser(userInfo){
-        // 检查在线用户，防止重复登录
-        global.onlineUsers.some(function (e, i) {
-            if (e.unionId == userInfo.unionId) {
+        // 返回true检查通过 返回false禁止登录
+        let success = true;
+        for(let i = 0; i<global.onlineUsers.length; i++){
+            if (global.onlineUsers[i].unionId == userInfo.unionId ||
+                global.onlineUsers[i].socketId == userInfo.socketId) {
                 console.log("用户重复登录:" + userInfo.unionId);
-                userManager.userDisconnect(userInfo.socketId);
+                success = false;
             }
-        });
-        let flag = -1;
-        global.onlineUsers.some(function (e, i) {
-            if (e.socketId == userInfo.socketId) {
-                flag = i;
-                return;
-            }
-        });
-        if (flag >= 0) {
-            global.onlineUsers.splice(flag, 1);
-            console.log("当前用户数：" + global.onlineUsers.length);
         }
+
+        return success;
     },
     getCurrentUser(socketId){
         // 取得当前用户信息

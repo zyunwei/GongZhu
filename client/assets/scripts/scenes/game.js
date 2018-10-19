@@ -1,4 +1,5 @@
 import global from "../global";
+import utils from "../utils";
 
 cc.Class({
     extends: cc.Component,
@@ -7,12 +8,14 @@ cc.Class({
 
     },
     start () {
-        if (!global.net.isInit) {
+        if (!global.net.socket) {
             cc.director.loadScene("login");
             return;
         }
     },
     exitRoomClick(event, data) {
-        cc.director.loadScene("lobby");
+        global.net.exitRoom(global.roomNo, function (result) {
+            cc.director.loadScene("lobby");
+        });
     },
 });

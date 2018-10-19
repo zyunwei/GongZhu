@@ -12,11 +12,19 @@ cc.Class({
         roomLayout: cc.Layout,
         roomBoxList: []
     },
+    onLoad() {
+        this.schedule(function () {
+            if(global.lobbyNeedUpdate == 1){
+                this.updateInfo();
+            }
+        }, 1);
+    },
     start() {
-        if (!global.net.isInit) {
+        if (!global.net.socket) {
             cc.director.loadScene("login");
             return;
         }
+
         let resUrl = "prefabs/roomBox";
         let self = this;
         cc.loader.loadRes(resUrl, function (err, prefab) {
@@ -66,6 +74,7 @@ cc.Class({
                     self.roomBoxList[roomIndex].active = true;
                 });
                 self.setButton(true);
+                global.lobbyNeedUpdate = 0;
             } else {
                 utils.messageBox("错误", result.message, function () {
                     global.net.disconnect();
@@ -91,6 +100,7 @@ cc.Class({
         let roomType = 1;
         global.net.createRoom(roomType, function (result) {
             if (result.success == "1") {
+                global.roomNo = result.data.no;
                 cc.director.loadScene("game");
             } else {
                 self.setButton(true);

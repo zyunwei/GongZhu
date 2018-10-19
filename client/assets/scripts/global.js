@@ -3,6 +3,9 @@ import net from 'net.js'
 const global = {};
 global.net = net();
 global.loginInfo = {};
+global.lobbyNeedUpdate = 0;
+global.notifyQueue = [];
+global.roomNo = 0;
 
 global.testUserInfo1 ={
     unionId: '10000',

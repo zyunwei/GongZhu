@@ -59,7 +59,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Login",
+    "_name": "Root",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1
@@ -374,7 +374,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 160,
+      "width": 164.59,
       "height": 40
     },
     "_anchorPoint": {
@@ -420,8 +420,8 @@
     "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_useOriginalSize": false,
-    "_string": "拱猪游戏",
-    "_N$string": "拱猪游戏",
+    "_string": "Loading..",
+    "_N$string": "Loading..",
     "_fontSize": 40,
     "_lineHeight": 40,
     "_enableWrapText": true,
@@ -1526,6 +1526,10 @@
       "__id__": 2
     },
     "_enabled": true,
+    "lblTitle": {
+      "__id__": 9
+    },
+    "startTitle": "欢迎来到拱猪游戏！",
     "_id": "58nBOk+aNEhoIX2YrpK5IN"
   }
 ]

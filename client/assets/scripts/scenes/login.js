@@ -4,12 +4,30 @@ import utils from '../utils'
 cc.Class({
     extends: cc.Component,
 
-    properties: {},
+    properties: {
+        lblTitle: cc.Label,
+        startTitle: "欢迎来到拱猪游戏！"
+    },
     start() {
         global.net.init();
         global.loginInfo = {};
     },
-    update(dt) {
+    onLoad(){
+        this.setButtonState(false);
+        this.schedule(function(){
+            if(this.lblTitle.string != this.startTitle && global.net.socket != null){
+                this.lblTitle.string = this.startTitle;
+                this.setButtonState(true);
+            }
+        },1);
+    },
+    setButtonState(enabled){
+        this.node.children.forEach(function (e) {
+            let btn = e.getComponent(cc.Button);
+            if (btn) {
+                btn.interactable = enabled;
+            }
+        });
     },
     onLogin(userInfo) {
         let nodeLabel = this.node.getChildByName("lblTitle");
@@ -17,12 +35,7 @@ cc.Class({
             nodeLabel.getComponent(cc.Label).string = "正在登录..";
         }
         // 禁用按钮
-        this.node.children.forEach(function (e) {
-            let btn = e.getComponent(cc.Button);
-            if (btn) {
-                btn.interactable = false;
-            }
-        });
+        this.setButtonState(false);
         global.net.login(userInfo, function (err, result) {
             if (err) {
                 console.log(err);

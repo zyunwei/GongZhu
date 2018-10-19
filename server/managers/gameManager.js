@@ -26,6 +26,51 @@ const gameManager = {
 
         global.rooms.push(roomInfo);
         return roomInfo;
+    },
+    joinRoom(unionId, roomNo) {
+        for (let i = 0; i < global.rooms.length; i++) {
+            if (global.rooms[i].no == roomNo) {
+                if (global.rooms[i].players.length >= 4) {
+                    return false;
+                }
+                global.rooms[i].players.push(unionId);
+                return true;
+            }
+        }
+        return false;
+    },
+    exitRoom(unionId, roomNo) {
+        let isOk = false;
+        for (let i = 0; i < global.rooms.length; i++) {
+            if (global.rooms[i].no == roomNo) {
+                let slotIndex = -1;
+                for (let j = 0; j < global.rooms[i].players.length; j++) {
+                    if (global.rooms[i].players[j] == unionId) {
+                        isOk = true;
+                        slotIndex = j;
+                        break;
+                    }
+                }
+                if (isOk) {
+                    global.rooms[i].players.splice(slotIndex, 1);
+                    this.checkRoomClose(roomNo);
+                    return true;
+                }
+                break;
+            }
+        }
+
+        return false;
+    },
+    checkRoomClose(roomNo) {
+        for (let i = 0; i < global.rooms.length; i++) {
+            if (global.rooms[i].no == roomNo) {
+                if (global.rooms[i].players.length <= 0) {
+                    global.rooms.splice(i, 1);
+                }
+                break;
+            }
+        }
     }
 };
 
