@@ -15,8 +15,16 @@ const userManager = {
 
         return success;
     },
+    getUserByUnionId(unionId){
+        let onlineUser = null;
+        global.onlineUsers.some(function (e, i) {
+            if (e.unionId == unionId) {
+                onlineUser = e;
+            }
+        });
+        return onlineUser;
+    },
     getCurrentUser(socketId){
-        // 取得当前用户信息
         let onlineUser = null;
         global.onlineUsers.some(function (e, i) {
             if (e.socketId == socketId) {
@@ -26,7 +34,6 @@ const userManager = {
         return onlineUser;
     },
     userDisconnect(socketId) {
-        // 用户网络断开处理
         let flag = -1;
         global.onlineUsers.some(function (e, i) {
             if (e.socketId == socketId) {
@@ -40,7 +47,6 @@ const userManager = {
         }
     },
     userLogin(userInfo, callback) {
-        // 用户登录
         userDal.getUserById(userInfo.unionId, function (err, result) {
             if (err) {
                 callback(err);

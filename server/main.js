@@ -100,7 +100,7 @@ io.on('connection', function (socket) {
         socket.leave("room" + roomNo);
         socket.join("lobby");
         socket.in("lobby").emit("notify", {type: "updateLobby"});
-
+        socket.in("room" + roomNo).emit("notify", {type: "updateRoom"});
         console.log(onlineUser.nickName + " 离开房间：" + roomNo);
 
         response({success: "1", message: "", data: roomNo});
@@ -117,9 +117,8 @@ io.on('connection', function (socket) {
 
         socket.leave("lobby");
         socket.join("room" + roomNo);
-
         socket.in("lobby").emit("notify", {type: "updateLobby"});
-
+        socket.in("room" + roomNo).emit("notify", {type: "updateRoom"});
         console.log(onlineUser.nickName + " 加入房间：" + roomNo);
 
         response({success: "1", message: "", data: roomNo});
@@ -145,12 +144,74 @@ io.on('connection', function (socket) {
         if (roomNo > 0) {
             socket.leave("lobby");
             socket.join("room" + roomNo);
-
             socket.in("lobby").emit("notify", {type: "updateLobby"});
-
+            socket.in("room" + roomNo).emit("notify", {type: "updateRoom"});
             console.log(onlineUser.nickName + " 加入房间：" + roomNo);
 
             response({success: "1", message: "", data: roomNo});
         }
+    });
+
+    socket.on('checkReconnectRoom', function (response) {
+        let onlineUser = userManager.getCurrentUser(socket.id);
+        if (onlineUser != null) {
+            for (let i = 0; i < global.rooms.length; i++) {
+                for(let j = 0; j < global.rooms[i].players.length; j++){
+                    if(global.rooms[i].players[j] == onlineUser.unionId){
+                        // 断线重连加入
+                        let roomNo  = global.rooms[i].no;
+                        socket.leave("lobby");
+                        socket.join("room" + roomNo);
+                        socket.in("lobby").emit("notify", {type: "updateLobby"});
+                        socket.in("room" + roomNo).emit("notify", {type: "updateRoom"});
+                        console.log(onlineUser.nickName + " 断线重连后加入房间：" + roomNo);
+
+                        response({success: "1", message: "", data: roomNo});
+                        return;
+                    }
+                }
+            }
+        }
+
+        response({success: "0", message: ""});
+    });
+
+    socket.on('getRoomInfo', function (roomNo, response) {
+        let result = {
+            success: "0",
+            message: "对不起，系统异常，请重新登录",
+            data: {}
+        };
+
+        let me = userManager.getCurrentUser(socket.id);
+
+        let userList = [];
+        let status = null;
+
+        for (let i = 0; i < global.rooms.length; i++) {
+            if (global.rooms[i].no != roomNo) continue;
+            for (let j = 0; j < global.rooms[i].players.length; j++) {
+                let onlineUser = userManager.getUserByUnionId(global.rooms[i].players[j]);
+                status = global.rooms[i].status;
+                if(onlineUser == null){
+                    onlineUser = {
+                        unionId: global.rooms[i].players[j],
+                        nickName: '断线玩家',
+                        money: '',
+                        socketId: ''
+                    };
+                }
+                userList.push(onlineUser);
+            }
+            break;
+        }
+
+        if (userList.length > 0) {
+            result.success = "1";
+            result.message = "";
+            result.data = {status, userList};
+        }
+
+        response(result);
     });
 });

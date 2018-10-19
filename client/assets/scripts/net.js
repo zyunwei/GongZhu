@@ -27,7 +27,7 @@ const net = function () {
         });
 
         _io.on("notify", function (data) {
-            // console.log("notify:" + JSON.stringify(data) + "dt:" + new Date());
+            console.log("notify:" + JSON.stringify(data) + Math.random());
             switch(data.type){
                 case "updateLobby":
                     global.lobbyNeedUpdate = 1;
@@ -77,6 +77,18 @@ const net = function () {
 
     that.quickJoinRoom = function(callback){
         that.socket.emit('quickJoin', function (data) {
+            callback(data);
+        });
+    }
+
+    that.checkReconnectRoom = function(callback){
+        that.socket.emit('checkReconnectRoom', function (data) {
+            callback(data);
+        });
+    }
+
+    that.getRoomInfo = function(roomNo, callback){
+        that.socket.emit('getRoomInfo', roomNo, function (data) {
             callback(data);
         });
     }

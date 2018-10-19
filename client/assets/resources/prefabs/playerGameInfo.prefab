@@ -12,7 +12,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "playerGameInfo",
+    "_name": "playerInfoWest",
     "_objFlags": 0,
     "_parent": null,
     "_children": [
@@ -24,10 +24,14 @@
       }
     ],
     "_active": true,
-    "_level": 1,
-    "_components": [],
+    "_level": 2,
+    "_components": [
+      {
+        "__id__": 20
+      }
+    ],
     "_prefab": {
-      "__id__": 20
+      "__id__": 21
     },
     "_opacity": 255,
     "_color": {
@@ -49,8 +53,8 @@
     },
     "_position": {
       "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
+      "x": -540,
+      "y": 50,
       "z": 0
     },
     "_scale": {
@@ -87,7 +91,7 @@
       }
     ],
     "_active": true,
-    "_level": 2,
+    "_level": 3,
     "_components": [
       {
         "__id__": 6
@@ -150,7 +154,7 @@
     },
     "_children": [],
     "_active": true,
-    "_level": 3,
+    "_level": 4,
     "_components": [
       {
         "__id__": 4
@@ -393,7 +397,7 @@
     },
     "_position": {
       "__type__": "cc.Vec3",
-      "x": -51,
+      "x": 0,
       "y": 16,
       "z": 0
     },
@@ -693,6 +697,22 @@
     },
     "fileId": "6dny6z3aRKl4s0iJ+uDtGS",
     "sync": false
+  },
+  {
+    "__type__": "ce5e2e4xnZIGb2mbP4Rn1BO",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "lblNickname": {
+      "__id__": 10
+    },
+    "lblMoney": {
+      "__id__": 13
+    },
+    "_id": ""
   },
   {
     "__type__": "cc.PrefabInfo",

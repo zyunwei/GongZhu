@@ -40,6 +40,14 @@ cc.Class({
                 self.roomBoxList.push(roomBoxPrefab);
             }
             self.updateInfo();
+
+            // 检查是否断线重连
+            global.net.checkReconnectRoom(function (result) {
+                if (result.success == "1") {
+                    global.roomNo = result.data;
+                    cc.director.loadScene("game");
+                }
+            });
         });
     },
     roomCountNumber: 0,

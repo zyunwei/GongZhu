@@ -30,6 +30,13 @@ const gameManager = {
     joinRoom(unionId, roomNo) {
         for (let i = 0; i < global.rooms.length; i++) {
             if (global.rooms[i].no == roomNo) {
+                // 如果存在相同ID，表示断线重连
+                for (let j = 0; j < global.rooms[i].players.length; j++) {
+                    if (global.rooms[i].players[j] == unionId) {
+                        return true;
+                    }
+                }
+
                 if (global.rooms[i].players.length >= 4) {
                     return false;
                 }
