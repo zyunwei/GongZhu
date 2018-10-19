@@ -34,7 +34,6 @@ cc.Class({
     },
     enterRoom: function (event, data) {
         global.net.joinRoom(this.RoomNumber ,function(result){
-            console.log(result);
             if (result.success == "1") {
                 global.roomNo = result.data;
                 cc.director.loadScene("game");

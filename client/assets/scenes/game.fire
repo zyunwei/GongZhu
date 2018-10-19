@@ -779,7 +779,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "playerInfo1",
+    "_name": "playerInfoNorth",
     "_objFlags": 0,
     "_parent": {
       "__id__": 2
@@ -1476,7 +1476,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "playerInfo2",
+    "_name": "playerInfoEast",
     "_objFlags": 0,
     "_parent": {
       "__id__": 2
@@ -2173,7 +2173,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "playerInfo3",
+    "_name": "playerInfoWest",
     "_objFlags": 0,
     "_parent": {
       "__id__": 2
@@ -2870,7 +2870,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "playerInfo4",
+    "_name": "playerInfoSouth",
     "_objFlags": 0,
     "_parent": {
       "__id__": 2

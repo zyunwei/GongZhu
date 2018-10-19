@@ -27,7 +27,7 @@ const net = function () {
         });
 
         _io.on("notify", function (data) {
-            console.log("notify:" + JSON.stringify(data) + "dt:" + new Date());
+            // console.log("notify:" + JSON.stringify(data) + "dt:" + new Date());
             switch(data.type){
                 case "updateLobby":
                     global.lobbyNeedUpdate = 1;
@@ -71,6 +71,12 @@ const net = function () {
 
     that.joinRoom = function(roomNo, callback){
         that.socket.emit('joinRoom', roomNo, function (data) {
+            callback(data);
+        });
+    }
+
+    that.quickJoinRoom = function(callback){
+        that.socket.emit('quickJoin', function (data) {
             callback(data);
         });
     }

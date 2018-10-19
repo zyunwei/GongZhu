@@ -111,6 +111,18 @@ cc.Class({
         });
     },
     quickJoinClick(event, data) {
-
+        let self = this;
+        self.setButton(false);
+        global.net.quickJoinRoom(function (result) {
+            if (result.success == "1") {
+                global.roomNo = result.data;
+                cc.director.loadScene("game");
+            } else {
+                self.setButton(true);
+                utils.messageBox("失败", result.message, function () {
+                    self.updateInfo();
+                });
+            }
+        });
     },
 });

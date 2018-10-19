@@ -124,4 +124,33 @@ io.on('connection', function (socket) {
 
         response({success: "1", message: "", data: roomNo});
     });
+
+    socket.on('quickJoin', function (response) {
+        let onlineUser = userManager.getCurrentUser(socket.id);
+        let roomNo = 0;
+        if (onlineUser != null) {
+            for (let i = 0; i < global.rooms.length; i++) {
+                if (global.rooms[i].players.length < 4) {
+                    roomNo = global.rooms[i].no;
+                    break;
+                }
+            }
+
+            if (roomNo <= 0 || !gameManager.joinRoom(onlineUser.unionId, roomNo)) {
+                response({success: "0", message: "加入房间失败"});
+                return;
+            }
+        }
+
+        if (roomNo > 0) {
+            socket.leave("lobby");
+            socket.join("room" + roomNo);
+
+            socket.in("lobby").emit("notify", {type: "updateLobby"});
+
+            console.log(onlineUser.nickName + " 加入房间：" + roomNo);
+
+            response({success: "1", message: "", data: roomNo});
+        }
+    });
 });
