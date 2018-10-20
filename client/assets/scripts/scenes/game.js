@@ -72,14 +72,14 @@ cc.Class({
                 });
 
                 let newUserList = self.sortUserList(result.data.userList);
-
-                console.log(result.data.userList);
                 console.log(newUserList);
-
                 newUserList.forEach(function (e, i) {
                     if (e.nickName) {
                         let playerInfo = self.playerInfos[i].getComponent("playerInfo");
                         self.playerInfos[i].active = true;
+                        if(e.isOnline == 0){
+                            e.nickName = e.nickName + "(断线)";
+                        }
                         playerInfo.init(e.nickName, e.money);
                     }
                 });

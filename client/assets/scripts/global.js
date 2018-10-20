@@ -8,11 +8,11 @@ global.notifyQueue = [];
 global.roomNo = 0;
 
 global.testUserInfo1 ={
-    unionId: '10000',
-    nickName: '张三',
+    unionId: '20000',
+    nickName: '刘二',
     gender: 1,
-    city: 'taiyuan',
-    province: 'shanxi',
+    city: 'shijiazhuang',
+    province: 'hebei',
     country: 'china',
     avatarUrl: 'https://www.google.com',
     updateTime: '',
@@ -20,11 +20,11 @@ global.testUserInfo1 ={
 };
 
 global.testUserInfo2 ={
-    unionId: '20000',
-    nickName: '刘二',
+    unionId: '10000',
+    nickName: '张三',
     gender: 1,
-    city: 'shijiazhuang',
-    province: 'hebei',
+    city: 'taiyuan',
+    province: 'shanxi',
     country: 'china',
     avatarUrl: 'https://www.google.com',
     updateTime: '',

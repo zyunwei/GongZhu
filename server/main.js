@@ -13,7 +13,7 @@ io.on('connection', function (socket) {
     });
     socket.on('disconnect', function () {
         console.log('user disconnected');
-        userManager.userDisconnect(socket.id);
+        userManager.userDisconnect(socket);
     });
 
     socket.on('login', function (userInfo, response) {
@@ -86,8 +86,6 @@ io.on('connection', function (socket) {
             gameManager.joinRoom(onlineUser.unionId, newRoom.no);
         }
 
-        console.log(onlineUser.unionId + " 创建房间：" + newRoom.no);
-
         response(result);
     });
 
@@ -101,7 +99,6 @@ io.on('connection', function (socket) {
         socket.join("lobby");
         socket.in("lobby").emit("notify", {type: "updateLobby"});
         socket.in("room" + roomNo).emit("notify", {type: "updateRoom"});
-        console.log(onlineUser.unionId + " 离开房间：" + roomNo);
 
         response({success: "1", message: "", data: roomNo});
     });
@@ -119,7 +116,6 @@ io.on('connection', function (socket) {
         socket.join("room" + roomNo);
         socket.in("lobby").emit("notify", {type: "updateLobby"});
         socket.in("room" + roomNo).emit("notify", {type: "updateRoom"});
-        console.log(onlineUser.unionId + " 加入房间：" + roomNo);
 
         response({success: "1", message: "", data: roomNo});
     });
@@ -146,7 +142,6 @@ io.on('connection', function (socket) {
             socket.join("room" + roomNo);
             socket.in("lobby").emit("notify", {type: "updateLobby"});
             socket.in("room" + roomNo).emit("notify", {type: "updateRoom"});
-            console.log(onlineUser.unionId + " 加入房间：" + roomNo);
 
             response({success: "1", message: "", data: roomNo});
         }
@@ -157,8 +152,9 @@ io.on('connection', function (socket) {
         if (onlineUser != null) {
             for (let i = 0; i < global.rooms.length; i++) {
                 for(let j = 0; j < global.rooms[i].players.length; j++){
-                    if(global.rooms[i].players[j] == onlineUser.unionId){
+                    if(global.rooms[i].players[j].unionId == onlineUser.unionId){
                         // 断线重连加入
+                        global.rooms[i].players[j].isOnline = 1;
                         let roomNo  = global.rooms[i].no;
                         socket.leaveAll();
                         socket.join("room" + roomNo);
@@ -188,19 +184,8 @@ io.on('connection', function (socket) {
 
         for (let i = 0; i < global.rooms.length; i++) {
             if (global.rooms[i].no != roomNo) continue;
-            for (let j = 0; j < global.rooms[i].players.length; j++) {
-                let onlineUser = userManager.getUserByUnionId(global.rooms[i].players[j]);
-                status = global.rooms[i].status;
-                if(onlineUser == null){
-                    onlineUser = {
-                        unionId: global.rooms[i].players[j],
-                        nickName: '断线玩家',
-                        money: '',
-                        socketId: ''
-                    };
-                }
-                userList.push(onlineUser);
-            }
+            status = global.rooms[i].status;
+            userList = global.rooms[i].players;
             break;
         }
 

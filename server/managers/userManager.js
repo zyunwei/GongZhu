@@ -5,7 +5,7 @@ const userManager = {
     checkOnlineUser(userInfo){
         // 返回true检查通过 返回false禁止登录
         let success = true;
-        for(let i = 0; i<global.onlineUsers.length; i++){
+        for(let i = 0; i < global.onlineUsers.length; i++){
             if (global.onlineUsers[i].unionId == userInfo.unionId ||
                 global.onlineUsers[i].socketId == userInfo.socketId) {
                 console.log("用户重复登录:" + userInfo.unionId);
@@ -33,18 +33,34 @@ const userManager = {
         });
         return onlineUser;
     },
-    userDisconnect(socketId) {
+    userDisconnect(socket) {
         let flag = -1;
+        let unionId = null;
         global.onlineUsers.some(function (e, i) {
-            if (e.socketId == socketId) {
+            if (e.socketId == socket.id) {
                 flag = i;
+                unionId = e.unionId;
                 return;
             }
         });
+
         if (flag >= 0) {
             global.onlineUsers.splice(flag, 1);
-            console.log("当前用户数：" + global.onlineUsers.length);
         }
+
+        if(unionId != null){
+            for (let i = 0; i < global.rooms.length; i++) {
+                for(let j = 0; j < global.rooms[i].players.length; j++){
+                    if(global.rooms[i].players[j].unionId == unionId){
+                        global.rooms[i].players[j].isOnline = 0;
+                        socket.in("room" + global.rooms[i].no).emit("notify", {type: "updateRoom"});
+                        break;
+                    }
+                }
+            }
+        }
+
+        socket.in("lobby").emit("notify", {type: "updateLobby"});
     },
     userLogin(userInfo, callback) {
         userDal.getUserById(userInfo.unionId, function (err, result) {
