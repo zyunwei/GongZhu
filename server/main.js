@@ -7,12 +7,7 @@ const io = require('socket.io')(3000);
 global.logger.info("服务器已启动");
 
 io.on('connection', function (socket) {
-    socket.on('message', function (data) {
-        console.log(data);
-        socket.emit('message', '拱猪服务器已连接')
-    });
     socket.on('disconnect', function () {
-        console.log('user disconnected');
         userManager.userDisconnect(socket);
     });
 
@@ -203,17 +198,31 @@ io.on('connection', function (socket) {
         if (onlineUser != null) {
             for (let i = 0; i < global.rooms.length; i++) {
                 for (let j = 0; j < global.rooms[i].players.length; j++) {
-                    if(global.rooms[i].players[j].unionId == onlineUser.unionId){
+                    if (global.rooms[i].players[j].unionId == onlineUser.unionId) {
                         global.rooms[i].players[j].status = 1;
-                        console.log("room" + global.rooms[i].no + "发送通知!");
+
+                        // 全部准备即开始游戏
+                        let readyCount = 0;
+                        for (let k = 0; k < global.rooms[i].players.length; k++) {
+                            if(global.rooms[i].players[k].status == 1){
+                                readyCount += 1;
+                            }
+                        }
+
+                        if(readyCount >= 4){
+                            global.rooms[i].status = 1;
+                            socket.in("lobby").emit("notify", {type: "updateLobby"});
+                        }
+
                         io.in("room" + global.rooms[i].no).emit("notify", {type: "updateRoom"});
                         response({success: "1", message: "", data: {}});
+
                         return;
                     }
                 }
             }
         }
 
-        response({success: "0", message: "系统异常，请重新登录"});
+        response({success: "0", message: "系统异常，请稍后再试"});
     });
 });

@@ -55,4 +55,17 @@ global.testUserInfo4 ={
     updateIp: ''
 };
 
+global.testUserInfo5 ={
+    unionId: '50000',
+    nickName: '赵六',
+    gender: 1,
+    city: 'haikou',
+    province: 'hainan',
+    country: 'china',
+    avatarUrl: 'https://www.google.com',
+    updateTime: '',
+    updateIp: ''
+};
+
+
 export default global;

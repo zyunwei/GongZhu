@@ -63,6 +63,10 @@ cc.Class({
                 let userInfo4 = utils.cloneObj(global.testUserInfo4);
                 this.onLogin(userInfo4);
                 break;
+            case "login5":
+                let userInfo5 = utils.cloneObj(global.testUserInfo5);
+                this.onLogin(userInfo5);
+                break;
         }
     },
 });

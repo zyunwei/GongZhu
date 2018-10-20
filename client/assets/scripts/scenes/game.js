@@ -73,7 +73,7 @@ cc.Class({
 
                 let newUserList = self.sortUserList(result.data.userList);
 
-                console.log(newUserList);
+                console.log(result);
                 newUserList.forEach(function (e, i) {
                     if (e.nickName) {
                         let playerInfo = self.playerInfos[i].getComponent("playerInfo");
@@ -83,9 +83,21 @@ cc.Class({
                         }
 
                         playerInfo.init(e.nickName, e.money);
-                        playerInfo.setReadyStatus(e.status == 1);
+                        playerInfo.setReadyStatus(result.data.status == 0 && e.status == 1);
                     }
                 });
+
+                switch (result.data.status) {
+                    case 0:
+                        self.node.getChildByName("btnExit").active = true;
+                        break;
+                    case 1:
+                        self.node.getChildByName("btnExit").active = false;
+                        break;
+                    case 2:
+                        self.node.getChildByName("btnExit").active = true;
+                        break;
+                }
             } else {
                 utils.messageBox("错误", result.message, function () {
                 });
