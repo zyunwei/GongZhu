@@ -8,6 +8,10 @@ cc.Class({
         playerInfos: {
             default: [],
             type: [cc.Node]
+        },
+        pokerDemo: {
+            default: null,
+            type: cc.Prefab
         }
     },
     onLoad() {
@@ -32,6 +36,11 @@ cc.Class({
         });
 
         this.updateInfo();
+
+        let testCard = cc.instantiate(this.pokerDemo);
+        let pokerScript =testCard.getComponent("pokerCard");
+        pokerScript.init('heart',13);
+        testCard.parent = this.node;
     },
     exitRoomClick(event, data) {
         global.net.exitRoom(global.roomNo, function (result) {
@@ -78,7 +87,7 @@ cc.Class({
                     if (e.nickName) {
                         let playerInfo = self.playerInfos[i].getComponent("playerInfo");
                         self.playerInfos[i].active = true;
-                        if(e.isOnline == 0){
+                        if (e.isOnline == 0) {
                             e.nickName = e.nickName + "(断线)";
                         }
 
