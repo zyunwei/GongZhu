@@ -3,7 +3,7 @@ cc.Class({
 
     properties: {
         lblNickname : cc.Label,
-        lblMoney: cc.Label
+        lblMoney: cc.Label,
     },
     start () {
 
@@ -11,5 +11,9 @@ cc.Class({
     init(nickname, money) {
         this.lblNickname.string = nickname;
         this.lblMoney.string = money;
+        this.setReadyStatus(false);
     },
+    setReadyStatus(ready){
+        this.node.getChildByName("ready").active = ready;
+    }
 });

@@ -72,6 +72,7 @@ cc.Class({
                 });
 
                 let newUserList = self.sortUserList(result.data.userList);
+
                 console.log(newUserList);
                 newUserList.forEach(function (e, i) {
                     if (e.nickName) {
@@ -80,11 +81,25 @@ cc.Class({
                         if(e.isOnline == 0){
                             e.nickName = e.nickName + "(断线)";
                         }
+
                         playerInfo.init(e.nickName, e.money);
+                        playerInfo.setReadyStatus(e.status == 1);
                     }
                 });
             } else {
                 utils.messageBox("错误", result.message, function () {
+                });
+            }
+        });
+    },
+    readyClick(event, data) {
+        let self = this;
+        global.net.setReady(function (result) {
+            if (result.success == "1") {
+                self.node.getChildByName("btnReady").active = false;
+            } else {
+                utils.messageBox("失败", result.message, function () {
+                    self.node.getChildByName("btnReady").active = true;
                 });
             }
         });

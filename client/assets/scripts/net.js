@@ -93,6 +93,12 @@ const net = function () {
         });
     }
 
+    that.setReady = function(callback){
+        that.socket.emit('setReady', function (data) {
+            callback(data);
+        });
+    }
+
     return that;
 }
 export default net;

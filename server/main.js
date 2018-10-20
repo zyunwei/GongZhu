@@ -151,11 +151,11 @@ io.on('connection', function (socket) {
         let onlineUser = userManager.getCurrentUser(socket.id);
         if (onlineUser != null) {
             for (let i = 0; i < global.rooms.length; i++) {
-                for(let j = 0; j < global.rooms[i].players.length; j++){
-                    if(global.rooms[i].players[j].unionId == onlineUser.unionId){
+                for (let j = 0; j < global.rooms[i].players.length; j++) {
+                    if (global.rooms[i].players[j].unionId == onlineUser.unionId) {
                         // 断线重连加入
                         global.rooms[i].players[j].isOnline = 1;
-                        let roomNo  = global.rooms[i].no;
+                        let roomNo = global.rooms[i].no;
                         socket.leaveAll();
                         socket.join("room" + roomNo);
                         socket.in("lobby").emit("notify", {type: "updateLobby"});
@@ -196,5 +196,24 @@ io.on('connection', function (socket) {
         }
 
         response(result);
+    });
+
+    socket.on('setReady', function (response) {
+        let onlineUser = userManager.getCurrentUser(socket.id);
+        if (onlineUser != null) {
+            for (let i = 0; i < global.rooms.length; i++) {
+                for (let j = 0; j < global.rooms[i].players.length; j++) {
+                    if(global.rooms[i].players[j].unionId == onlineUser.unionId){
+                        global.rooms[i].players[j].status = 1;
+                        console.log("room" + global.rooms[i].no + "发送通知!");
+                        io.in("room" + global.rooms[i].no).emit("notify", {type: "updateRoom"});
+                        response({success: "1", message: "", data: {}});
+                        return;
+                    }
+                }
+            }
+        }
+
+        response({success: "0", message: "系统异常，请重新登录"});
     });
 });
