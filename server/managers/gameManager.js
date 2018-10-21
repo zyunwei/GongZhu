@@ -88,6 +88,17 @@ const gameManager = {
                 break;
             }
         }
+    },
+    getCardInfo(unionId, roomNo){
+        for (let i = 0; i < global.rooms.length; i++) {
+            if (global.rooms[i].no == roomNo) {
+                for(let j = 0; j < global.rooms[i].players.length; j++){
+                    if(global.rooms[i].players[j].unionId == unionId){
+                        return global.rooms[i].players[j].cards;
+                    }
+                }
+            }
+        }
     }
 };
 

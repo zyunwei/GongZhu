@@ -1,6 +1,7 @@
 import global from './global';
 import userManager from './managers/userManager';
 import gameManager from './managers/gameManager';
+import cardManager from "./managers/cardManager";
 
 const io = require('socket.io')(3000);
 
@@ -180,7 +181,17 @@ io.on('connection', function (socket) {
         for (let i = 0; i < global.rooms.length; i++) {
             if (global.rooms[i].no != roomNo) continue;
             status = global.rooms[i].status;
-            userList = global.rooms[i].players;
+
+            for (let j = 0; j < global.rooms[i].players.length; j++) {
+                let user = global.rooms[i].players[j];
+                userList.push({
+                    unionId: user.unionId,
+                    isOnline: user.isOnline,
+                    money: user.money,
+                    nickName: user.nickName,
+                    status: user.status
+                });
+            }
             break;
         }
 
@@ -204,12 +215,21 @@ io.on('connection', function (socket) {
                         // 全部准备即开始游戏
                         let readyCount = 0;
                         for (let k = 0; k < global.rooms[i].players.length; k++) {
-                            if(global.rooms[i].players[k].status == 1){
+                            if (global.rooms[i].players[k].status == 1) {
                                 readyCount += 1;
                             }
                         }
 
-                        if(readyCount >= 4){
+                        if (readyCount >= 4) {
+                            let cards = cardManager.getAllCard();
+                            cards = cardManager.shuffle(cards);
+                            cards = cardManager.splitParts(cards, 4);
+                            cards = cardManager.sortCards(cards);
+
+                            for(let x = 0; x < global.rooms[i].players.length; x++){
+                                global.rooms[i].players[x].cards = cards[x];
+                            }
+
                             global.rooms[i].status = 1;
                             socket.in("lobby").emit("notify", {type: "updateLobby"});
                         }
@@ -221,6 +241,16 @@ io.on('connection', function (socket) {
                     }
                 }
             }
+        }
+
+        response({success: "0", message: "系统异常，请稍后再试"});
+    });
+
+    socket.on('getCardInfo', function (roomNo, response) {
+        let onlineUser = userManager.getCurrentUser(socket.id);
+        if (onlineUser != null) {
+            let cards = gameManager.getCardInfo(onlineUser.unionId, roomNo);
+            response({success: "1", message: "", data: cards});
         }
 
         response({success: "0", message: "系统异常，请稍后再试"});

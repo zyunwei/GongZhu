@@ -99,6 +99,12 @@ const net = function () {
         });
     }
 
+    that.getCardInfo = function(roomNo, callback){
+        that.socket.emit('getCardInfo', roomNo, function (data) {
+            callback(data);
+        });
+    }
+
     return that;
 }
 export default net;

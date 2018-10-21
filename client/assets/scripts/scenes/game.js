@@ -36,11 +36,6 @@ cc.Class({
         });
 
         this.updateInfo();
-
-        let testCard = cc.instantiate(this.pokerDemo);
-        let pokerScript =testCard.getComponent("pokerCard");
-        pokerScript.init('heart',13);
-        testCard.parent = this.node;
     },
     exitRoomClick(event, data) {
         global.net.exitRoom(global.roomNo, function (result) {
@@ -83,6 +78,11 @@ cc.Class({
                 let newUserList = self.sortUserList(result.data.userList);
 
                 console.log(result);
+
+                if(result.data.status == 1){
+                    self.initCards(self);
+                }
+
                 newUserList.forEach(function (e, i) {
                     if (e.nickName) {
                         let playerInfo = self.playerInfos[i].getComponent("playerInfo");
@@ -92,7 +92,12 @@ cc.Class({
                         }
 
                         playerInfo.init(e.nickName, e.money);
+
                         playerInfo.setReadyStatus(result.data.status == 0 && e.status == 1);
+
+                        if (i == 0) {
+                            self.node.getChildByName("btnReady").active = e.status != 1;
+                        }
                     }
                 });
 
@@ -125,4 +130,21 @@ cc.Class({
             }
         });
     },
+    initCards(self) {
+        global.net.getCardInfo(global.roomNo, function (result) {
+            if (result.success == "1") {
+                let posX = -300;
+                result.data.forEach(function (e, i) {
+                    let showCard = cc.instantiate(self.pokerDemo);
+                    let pokerScript = showCard.getComponent("pokerCard");
+                    pokerScript.init(e.suit, e.number);
+                    showCard.parent = self.node;
+                    showCard.setPosition(posX, -180);
+                    posX += 50;
+                });
+            } else {
+                utils.messageBox("失败", result.message, function () {});
+            }
+        });
+    }
 });
