@@ -10,7 +10,7 @@ cc.Class({
             default: null,
             type: cc.Sprite
         },
-        canTouch: true,
+        canTouch: false,
         isTouched: false
     },
     onLoad() {
@@ -26,7 +26,7 @@ cc.Class({
         let self = this;
         let suitImg = 'poker/_' + suit;
         let numberImg = 'poker/';
-        numberImg += suit == 'heart' || suit == 'diamond' ? 'r' : 'b';
+        numberImg += suit === 'heart' || suit === 'diamond' ? 'r' : 'b';
         numberImg += number;
         cc.loader.loadRes(suitImg, cc.SpriteFrame, function (err, sprite) {
             self.pokerSuit.getComponent(cc.Sprite).spriteFrame = sprite;

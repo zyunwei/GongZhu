@@ -1,104 +1,73 @@
 import global from "../global";
-import userManager from "./userManager";
+import cardManager from './cardManager'
 
 const gameManager = {
-    createRoom(roomType) {
-        let roomNo = 1;
-        for (roomNo = 1; roomNo < 100000; roomNo++) {
-            let isOk = true;
-            for (let i = 0; i < global.rooms.length; i++) {
-                if (global.rooms[i].no == roomNo) {
-                    isOk = false;
-                    break;
-                }
-            }
-
-            if (isOk) {
-                break;
-            }
-        }
-
-        let roomInfo = {
-            no: roomNo,
-            type: roomType,
+    startGame(io, room) {
+        let newGame = {
+            gameId: new Date().getTime(),
+            roomNo: room.no,
             players: [],
-            status: 0
+            turn: 0,
+            firstDealerIndex: 0
         };
 
-        global.rooms.push(roomInfo);
-        return roomInfo;
-    },
-    joinRoom(unionId, roomNo) {
-        for (let i = 0; i < global.rooms.length; i++) {
-            if (global.rooms[i].no == roomNo) {
-                // 如果存在相同ID，表示断线重连
-                for (let j = 0; j < global.rooms[i].players.length; j++) {
-                    if (global.rooms[i].players[j].unionId == unionId) {
-                        global.rooms[i].players[j].isOnline = 1;
-                        return true;
-                    }
-                }
+        let cards = cardManager.getAllCard();
+        cards = cardManager.shuffle(cards);
+        cards = cardManager.splitParts(cards, 4);
+        cards = cardManager.sortCards(cards);
 
-                if (global.rooms[i].players.length >= 4) {
-                    return false;
+        room.players.forEach(function (e, i) {
+            newGame.players.push({
+                unionId: e.unionId,
+                cards: cards[i],
+            });
+            cards[i].some(function (ee, ii) {
+                if (ee.suit === "club" && ee.number === 2) {
+                    newGame.firstDealerIndex == i;
                 }
-                let userInfo = userManager.getUserByUnionId(unionId);
-                global.rooms[i].players.push(
-                    {
-                        unionId : userInfo.unionId,
-                        nickName : userInfo.nickName,
-                        money : userInfo.money,
-                        status : 0,
-                        isOnline : 1
-                    });
-                return true;
-            }
-        }
-        return false;
-    },
-    exitRoom(unionId, roomNo) {
-        let isOk = false;
-        for (let i = 0; i < global.rooms.length; i++) {
-            if (global.rooms[i].no == roomNo) {
-                let slotIndex = -1;
-                for (let j = 0; j < global.rooms[i].players.length; j++) {
-                    if (global.rooms[i].players[j].unionId == unionId) {
-                        isOk = true;
-                        slotIndex = j;
-                        break;
-                    }
-                }
-                if (isOk) {
-                    global.rooms[i].players.splice(slotIndex, 1);
-                    this.checkRoomClose(roomNo);
-                    return true;
-                }
-                break;
-            }
-        }
+            });
+        });
 
-        return false;
+        room.gameId = newGame.gameId;
+        room.status = 1;
+
+        newGame.currentTurn = {
+            turnPlayer : newGame.players[newGame.firstDealerIndex].unionId,
+            turnCards: [],
+            turnTimeout : 20
+        };
+
+        global.games.push(newGame);
+
+        io.in("room" + room.no).emit("notify", {
+            type: "updateTurn",
+            data: newGame.currentTurn
+        });
+        io.in("lobby").emit("notify", {type: "updateLobby"});
     },
-    checkRoomClose(roomNo) {
+    getGameByRoomNo(roomNo) {
         for (let i = 0; i < global.rooms.length; i++) {
-            if (global.rooms[i].no == roomNo) {
-                if (global.rooms[i].players.length <= 0) {
-                    global.rooms.splice(i, 1);
-                }
-                break;
+            if (global.rooms[i].no === roomNo) {
+                return this.getGameByGameId(global.rooms[i].gameId);
             }
         }
+        return null;
     },
-    getCardInfo(unionId, roomNo){
-        for (let i = 0; i < global.rooms.length; i++) {
-            if (global.rooms[i].no == roomNo) {
-                for(let j = 0; j < global.rooms[i].players.length; j++){
-                    if(global.rooms[i].players[j].unionId == unionId){
-                        return global.rooms[i].players[j].cards;
-                    }
-                }
+    getGameByGameId(gameId) {
+        for (let i = 0; i < global.games.length; i++) {
+            if (global.games[i].gameId === gameId) {
+                return global.games[i];
             }
         }
+        return null;
+    },
+    getCardInfo(game, unionId) {
+        for (let i = 0; i < game.players.length; i++) {
+            if (game.players[i].unionId === unionId) {
+                return game.players[i].cards;
+            }
+        }
+        return [];
     }
 };
 

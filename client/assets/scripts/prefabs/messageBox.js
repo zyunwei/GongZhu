@@ -15,7 +15,7 @@ cc.Class({
 
     },
     ok: function (event, customEventData) {
-        if(typeof(this.okCallback) != "undefined"){
+        if(typeof(this.okCallback) !== "undefined"){
             this.okCallback();
         }
         this.node.destroy();

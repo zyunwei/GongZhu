@@ -10,5 +10,6 @@ global.logger = log4js.getLogger('log');
 global.onlineUsers = [];
 global.rooms = [];
 global.serverStatus = 0; // 0 初始化 1 运行中 2 维护中
+global.games = [];
 
 export default global;

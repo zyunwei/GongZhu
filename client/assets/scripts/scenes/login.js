@@ -15,7 +15,7 @@ cc.Class({
     onLoad(){
         this.setButtonState(false);
         this.schedule(function(){
-            if(this.lblTitle.string != this.startTitle && global.net.socket != null){
+            if(this.lblTitle.string !== this.startTitle && global.net.socket != null){
                 this.lblTitle.string = this.startTitle;
                 this.setButtonState(true);
             }

@@ -1,7 +1,6 @@
 import global from './global';
 import userManager from './managers/userManager';
 import gameManager from './managers/gameManager';
-import cardManager from "./managers/cardManager";
 
 const io = require('socket.io')(3000);
 
@@ -66,7 +65,7 @@ io.on('connection', function (socket) {
             data: {}
         };
 
-        let newRoom = gameManager.createRoom(roomType);
+        let newRoom = userManager.createRoom(roomType);
         if (newRoom != null) {
             result.success = "1";
             result.message = "";
@@ -79,7 +78,7 @@ io.on('connection', function (socket) {
 
         let onlineUser = userManager.getCurrentUser(socket.id);
         if (onlineUser != null) {
-            gameManager.joinRoom(onlineUser.unionId, newRoom.no);
+            userManager.joinRoom(onlineUser.unionId, newRoom.no);
         }
 
         response(result);
@@ -88,7 +87,7 @@ io.on('connection', function (socket) {
     socket.on('exitRoom', function (roomNo, response) {
         let onlineUser = userManager.getCurrentUser(socket.id);
         if (onlineUser != null) {
-            gameManager.exitRoom(onlineUser.unionId, roomNo);
+            userManager.exitRoom(onlineUser.unionId, roomNo);
         }
 
         socket.leaveAll();
@@ -102,7 +101,7 @@ io.on('connection', function (socket) {
     socket.on('joinRoom', function (roomNo, response) {
         let onlineUser = userManager.getCurrentUser(socket.id);
         if (onlineUser != null) {
-            if (!gameManager.joinRoom(onlineUser.unionId, roomNo)) {
+            if (!userManager.joinRoom(onlineUser.unionId, roomNo)) {
                 response({success: "0", message: "加入房间失败"});
                 return;
             }
@@ -127,7 +126,7 @@ io.on('connection', function (socket) {
                 }
             }
 
-            if (roomNo <= 0 || !gameManager.joinRoom(onlineUser.unionId, roomNo)) {
+            if (roomNo <= 0 || !userManager.joinRoom(onlineUser.unionId, roomNo)) {
                 response({success: "0", message: "加入房间失败"});
                 return;
             }
@@ -148,7 +147,7 @@ io.on('connection', function (socket) {
         if (onlineUser != null) {
             for (let i = 0; i < global.rooms.length; i++) {
                 for (let j = 0; j < global.rooms[i].players.length; j++) {
-                    if (global.rooms[i].players[j].unionId == onlineUser.unionId) {
+                    if (global.rooms[i].players[j].unionId === onlineUser.unionId) {
                         // 断线重连加入
                         global.rooms[i].players[j].isOnline = 1;
                         let roomNo = global.rooms[i].no;
@@ -179,7 +178,7 @@ io.on('connection', function (socket) {
         let status = null;
 
         for (let i = 0; i < global.rooms.length; i++) {
-            if (global.rooms[i].no != roomNo) continue;
+            if (global.rooms[i].no !== roomNo) continue;
             status = global.rooms[i].status;
 
             for (let j = 0; j < global.rooms[i].players.length; j++) {
@@ -209,29 +208,19 @@ io.on('connection', function (socket) {
         if (onlineUser != null) {
             for (let i = 0; i < global.rooms.length; i++) {
                 for (let j = 0; j < global.rooms[i].players.length; j++) {
-                    if (global.rooms[i].players[j].unionId == onlineUser.unionId) {
+                    if (global.rooms[i].players[j].unionId === onlineUser.unionId) {
                         global.rooms[i].players[j].status = 1;
 
                         // 全部准备即开始游戏
                         let readyCount = 0;
                         for (let k = 0; k < global.rooms[i].players.length; k++) {
-                            if (global.rooms[i].players[k].status == 1) {
+                            if (global.rooms[i].players[k].status === 1) {
                                 readyCount += 1;
                             }
                         }
 
                         if (readyCount >= 4) {
-                            let cards = cardManager.getAllCard();
-                            cards = cardManager.shuffle(cards);
-                            cards = cardManager.splitParts(cards, 4);
-                            cards = cardManager.sortCards(cards);
-
-                            for(let x = 0; x < global.rooms[i].players.length; x++){
-                                global.rooms[i].players[x].cards = cards[x];
-                            }
-
-                            global.rooms[i].status = 1;
-                            socket.in("lobby").emit("notify", {type: "updateLobby"});
+                            gameManager.startGame(io, global.rooms[i]);
                         }
 
                         io.in("room" + global.rooms[i].no).emit("notify", {type: "updateRoom"});
@@ -248,11 +237,34 @@ io.on('connection', function (socket) {
 
     socket.on('getCardInfo', function (roomNo, response) {
         let onlineUser = userManager.getCurrentUser(socket.id);
-        if (onlineUser != null) {
-            let cards = gameManager.getCardInfo(onlineUser.unionId, roomNo);
-            response({success: "1", message: "", data: cards});
+        if (!onlineUser) {
+            response({success: "0", message: "系统异常，请稍后再试"});
+            return;
         }
 
-        response({success: "0", message: "系统异常，请稍后再试"});
+        let game = gameManager.getGameByRoomNo(roomNo);
+        if (!game) {
+            response({success: "0", message: "系统异常，请稍后再试"});
+            return;
+        }
+
+        let cards = gameManager.getCardInfo(game, onlineUser.unionId);
+        response({success: "1", message: "", data: cards});
+    });
+
+    socket.on('getTurnInfo', function (roomNo, response) {
+        let onlineUser = userManager.getCurrentUser(socket.id);
+        if (!onlineUser) {
+            response({success: "0", message: "系统异常，请稍后再试"});
+            return;
+        }
+
+        let game = gameManager.getGameByRoomNo(roomNo);
+        if (!game) {
+            response({success: "0", message: "系统异常，请稍后再试"});
+            return;
+        }
+
+        response({success: "1", message: "", data: game.currentTurn});
     });
 });

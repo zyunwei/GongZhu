@@ -41,7 +41,7 @@ const net = function () {
 
     that.login = function (userInfo, callback) {
         that.socket.emit('login', userInfo, function (data) {
-            if (data == "success") {
+            if (data === "success") {
                 global.loginInfo.unionId = userInfo.unionId;
                 callback(null, "");
             } else {
@@ -101,6 +101,12 @@ const net = function () {
 
     that.getCardInfo = function(roomNo, callback){
         that.socket.emit('getCardInfo', roomNo, function (data) {
+            callback(data);
+        });
+    }
+
+    that.getTurnInfo = function(roomNo, callback){
+        that.socket.emit('getTurnInfo', roomNo, function (data) {
             callback(data);
         });
     }

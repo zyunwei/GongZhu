@@ -14,7 +14,7 @@ cc.Class({
     },
     onLoad() {
         this.schedule(function () {
-            if(global.lobbyNeedUpdate == 1){
+            if(global.lobbyNeedUpdate === 1){
                 this.updateInfo();
             }
         }, 1);
@@ -43,7 +43,7 @@ cc.Class({
 
             // 检查是否断线重连
             global.net.checkReconnectRoom(function (result) {
-                if (result.success == "1") {
+                if (result.success === "1") {
                     global.roomNo = result.data;
                     cc.director.loadScene("game");
                 }
@@ -63,7 +63,7 @@ cc.Class({
         let self = this;
         self.setButton(false);
         global.net.getLobbyInfo(this.currentPage, function (result) {
-            if (result.success == "1") {
+            if (result.success === "1") {
                 global.loginInfo = result.data.loginInfo;
                 self.nickname.string = global.loginInfo.nickName;
                 self.money.string = global.loginInfo.money;
@@ -107,7 +107,7 @@ cc.Class({
         self.setButton(false);
         let roomType = 1;
         global.net.createRoom(roomType, function (result) {
-            if (result.success == "1") {
+            if (result.success === "1") {
                 global.roomNo = result.data.no;
                 cc.director.loadScene("game");
             } else {
@@ -122,7 +122,7 @@ cc.Class({
         let self = this;
         self.setButton(false);
         global.net.quickJoinRoom(function (result) {
-            if (result.success == "1") {
+            if (result.success === "1") {
                 global.roomNo = result.data;
                 cc.director.loadScene("game");
             } else {
