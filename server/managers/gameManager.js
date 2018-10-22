@@ -23,7 +23,7 @@ const gameManager = {
             });
             cards[i].some(function (ee, ii) {
                 if (ee.suit === "club" && ee.number === 2) {
-                    newGame.firstDealerIndex == i;
+                    newGame.firstDealerIndex = i;
                 }
             });
         });
@@ -32,9 +32,9 @@ const gameManager = {
         room.status = 1;
 
         newGame.currentTurn = {
-            turnPlayer : newGame.players[newGame.firstDealerIndex].unionId,
+            turnPlayer: newGame.players[newGame.firstDealerIndex].unionId,
             turnCards: [],
-            turnTimeout : 20
+            turnTimeout: 20
         };
 
         global.games.push(newGame);
@@ -68,6 +68,34 @@ const gameManager = {
             }
         }
         return [];
+    },
+    playCard(game, unionId, selectedCard) {
+        let success = 0;
+        for (let i = 0; i < game.players.length; i++) {
+            if (game.players[i].unionId === unionId) {
+                let turnCard = [];
+                for (let j = game.players[i].cards.length - 1; j >= 0; j--) {
+                    for (let k = 0; k < selectedCard.length; k++) {
+                        if (game.players[i].cards[j].number === selectedCard[k].number &&
+                            game.players[i].cards[j].suit === selectedCard[k].suit) {
+                            turnCard.push(game.players[i].cards[j]);
+                            game.players[i].cards.splice(j, 1);
+                            success = 1;
+                        }
+                    }
+                }
+                if(success === 1){
+                    game.currentTurn.turnCards.push(turnCard);
+                    game.turn++;
+                    game.currentTurn.turnPlayer = game.players[Math.abs(game.firstDealerIndex - game.turn) % 4].unionId;
+                    break;
+                } else{
+                    console.log("can't find " + JSON.stringify(selectedCard));
+                }
+            }
+        }
+
+        return success === 1;
     }
 };
 

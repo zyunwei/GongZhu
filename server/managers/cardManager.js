@@ -70,6 +70,12 @@ const cardManager = {
             }
         }
 
+        for (let i = 0; i < cards.length; i++) {
+            for (let j = 0; j < cards[i].length; j++) {
+                delete cards[i][j].score;
+            }
+        }
+
         return cards;
     }
 };

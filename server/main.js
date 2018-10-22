@@ -287,6 +287,16 @@ io.on('connection', function (socket) {
             return;
         }
 
+        if(!gameManager.playCard(game, onlineUser.unionId, selectedCard)){
+            response({success: "0", message: "游戏数据异常，请稍后再试"});
+            return;
+        }
+
+        io.in("room" + room.no).emit("notify", {
+            type: "updateTurn",
+            data: game.currentTurn
+        });
+
         response({success: "1", message: "", data: game.currentTurn});
     });
 });

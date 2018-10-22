@@ -19,18 +19,31 @@ cc.Class({
     onLoad() {
         let self = this;
         this.schedule(function () {
-            let notify = global.notifyQueue.shift();
-            if (notify) {
-                switch (notify.type) {
-                    case "updateRoom":
-                        this.updateInfo();
-                        break;
-                    case "updateTurn":
-                        this.updateTurn(self, notify.data);
-                        break;
+            let lastUpdate = null;
+            let lastTurnInfo = null;
+            while (global.notifyQueue.length > 0) {
+                let notify = global.notifyQueue.shift();
+                if (notify) {
+                    switch (notify.type) {
+                        case "updateRoom":
+                            lastUpdate = 1;
+                            break;
+                        case "updateTurn":
+                            lastTurnInfo = notify.data;
+                            break;
+                    }
                 }
             }
+            if (lastUpdate != null) {
+                this.updateInfo();
+            }
+            ;
+
+            if (lastTurnInfo != null) {
+                this.updateTurn(self, lastTurnInfo);
+            }
         }, 1);
+        self.node.getChildByName("btnPlayCard").active = false;
     },
     start() {
         if (!global.net.socket) {
@@ -167,7 +180,7 @@ cc.Class({
 
         for (let i = 0; i < self.playerInfos.length; i++) {
             let playerInfo = self.playerInfos[i].getComponent("playerInfo");
-
+            playerInfo.setCountdown(0);
             if (data.turnPlayer === playerInfo.unionId) {
                 playerInfo.setCountdown(data.turnTimeout);
             }
@@ -196,15 +209,25 @@ cc.Class({
 
         if (selectedCard.length === 0) {
             utils.messageBox("提示", "请选择要出的牌");
+            return;
         }
 
         if (selectedCard.length > 1) {
             utils.messageBox("提示", "您只能选择一张牌");
+            return;
         }
 
-        console.log(selectedCard);
         global.net.playCard(selectedCard, function (result) {
-            console.log(result);
+            if (result.success === "1") {
+                for (let i = myCards.children.length - 1; i >= 0; i--) {
+                    let pokerCard = myCards.children[i].getComponent("pokerCard");
+                    if (pokerCard.isTouched) {
+                        myCards.children[i].destroy();
+                    }
+                }
+            } else {
+                utils.messageBox("失败", result.message);
+            }
         });
     },
 });
