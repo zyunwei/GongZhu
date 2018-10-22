@@ -238,13 +238,13 @@ io.on('connection', function (socket) {
     socket.on('getCardInfo', function (roomNo, response) {
         let onlineUser = userManager.getCurrentUser(socket.id);
         if (!onlineUser) {
-            response({success: "0", message: "系统异常，请稍后再试"});
+            response({success: "0", message: "账号异常，请稍后再试"});
             return;
         }
 
         let game = gameManager.getGameByRoomNo(roomNo);
         if (!game) {
-            response({success: "0", message: "系统异常，请稍后再试"});
+            response({success: "0", message: "游戏信息异常，请稍后再试"});
             return;
         }
 
@@ -255,13 +255,35 @@ io.on('connection', function (socket) {
     socket.on('getTurnInfo', function (roomNo, response) {
         let onlineUser = userManager.getCurrentUser(socket.id);
         if (!onlineUser) {
-            response({success: "0", message: "系统异常，请稍后再试"});
+            response({success: "0", message: "账号异常，请稍后再试"});
             return;
         }
 
         let game = gameManager.getGameByRoomNo(roomNo);
         if (!game) {
-            response({success: "0", message: "系统异常，请稍后再试"});
+            response({success: "0", message: "游戏信息异常，请稍后再试"});
+            return;
+        }
+
+        response({success: "1", message: "", data: game.currentTurn});
+    });
+
+    socket.on('playCard', function (selectedCard, response) {
+        let onlineUser = userManager.getCurrentUser(socket.id);
+        if (!onlineUser) {
+            response({success: "0", message: "账号异常，请稍后再试"});
+            return;
+        }
+
+        let room = userManager.getRoomByUnionId(onlineUser.unionId);
+        if(!room){
+            response({success: "0", message: "房间信息异常，请稍后再试"});
+            return;
+        }
+
+        let game = gameManager.getGameByRoomNo(room.no);
+        if (!game) {
+            response({success: "0", message: "游戏信息异常，请稍后再试"});
             return;
         }
 

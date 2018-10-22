@@ -111,6 +111,12 @@ const net = function () {
         });
     }
 
+    that.playCard = function(selectedCard, callback){
+        that.socket.emit('playCard', selectedCard, function (data) {
+            callback(data);
+        });
+    }
+
     return that;
 }
 export default net;

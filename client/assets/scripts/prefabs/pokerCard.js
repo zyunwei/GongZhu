@@ -10,6 +10,8 @@ cc.Class({
             default: null,
             type: cc.Sprite
         },
+        suit: '',
+        number: 0,
         canTouch: false,
         isTouched: false
     },
@@ -20,6 +22,8 @@ cc.Class({
 
     },
     init: function (suit, number) {
+        this.suit = suit;
+        this.number = number;
         if (number < 10) {
             number = '0' + number;
         }
@@ -46,10 +50,10 @@ cc.Class({
         }, this);
     },
     handleResponse: function (isTouched) {
-        if(isTouched){
-            this.node.runAction(cc.moveBy(0.2,0,-30));
-        } else{
-            this.node.runAction(cc.moveBy(0.2,0,30));
+        if (isTouched) {
+            this.node.runAction(cc.moveBy(0.2, 0, -30));
+        } else {
+            this.node.runAction(cc.moveBy(0.2, 0, 30));
         }
     }
 });

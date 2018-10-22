@@ -32,6 +32,17 @@ const userManager = {
         });
         return onlineUser;
     },
+    getRoomByUnionId(unionId){
+        for (let i = 0; i < global.rooms.length; i++) {
+            for(let j = 0; j < global.rooms[i].players.length; j++){
+                if(global.rooms[i].players[j].unionId === unionId){
+                    return global.rooms[i];
+                    break;
+                }
+            }
+        }
+        return null;
+    },
     userDisconnect(socket) {
         let flag = -1;
         let unionId = null;
@@ -46,7 +57,7 @@ const userManager = {
             global.onlineUsers.splice(flag, 1);
         }
 
-        if(unionId != null){
+        if(unionId){
             for (let i = 0; i < global.rooms.length; i++) {
                 for(let j = 0; j < global.rooms[i].players.length; j++){
                     if(global.rooms[i].players[j].unionId === unionId){

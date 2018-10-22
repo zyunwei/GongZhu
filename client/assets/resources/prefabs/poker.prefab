@@ -221,7 +221,7 @@
     },
     "_position": {
       "__type__": "cc.Vec3",
-      "x": -41,
+      "x": -42,
       "y": 53,
       "z": 0
     },
@@ -327,6 +327,8 @@
     "pokerNumber": {
       "__id__": 6
     },
+    "canTouch": false,
+    "isTouched": false,
     "_id": ""
   },
   {

@@ -13,7 +13,8 @@ cc.Class({
             default: null,
             type: cc.Prefab
         },
-        isGameStart: false
+        isGameStart: false,
+        isInitCards: false
     },
     onLoad() {
         let self = this;
@@ -82,7 +83,7 @@ cc.Class({
 
                 let newUserList = self.sortUserList(result.data.userList);
 
-                if (result.data.status === 1) {
+                if (result.data.status === 1 && !self.isInitCards) {
                     self.initCards(self);
                 }
 
@@ -116,8 +117,7 @@ cc.Class({
                         break;
                 }
             } else {
-                utils.messageBox("错误", result.message, function () {
-                });
+                utils.messageBox("错误", result.message);
             }
         });
     },
@@ -136,7 +136,6 @@ cc.Class({
     initCards(self) {
         global.net.getCardInfo(global.roomNo, function (result) {
             if (result.success === "1") {
-                let posX = -300;
                 let myCards = self.node.getChildByName("myCards");
                 myCards.removeAllChildren(true);
                 result.data.forEach(function (e, i) {
@@ -146,9 +145,9 @@ cc.Class({
                     showCard.parent = myCards;
                 });
                 self.isGameStart = true;
+                self.isInitCards = true;
             } else {
-                utils.messageBox("失败", result.message, function () {
-                });
+                utils.messageBox("失败", result.message);
             }
 
             self.initTurn(self);
@@ -159,8 +158,7 @@ cc.Class({
             if (result.success === "1") {
                 self.updateTurn(self, result.data)
             } else {
-                utils.messageBox("失败", result.message, function () {
-                });
+                utils.messageBox("失败", result.message);
             }
         });
     },
@@ -175,12 +173,38 @@ cc.Class({
             }
         }
 
-        if (data.turnPlayer == global.loginInfo.unionId) {
-            let myCards = self.node.getChildByName("myCards");
-            for (let i = 0; i < myCards.children.length; i++) {
-                let pokerCard = myCards.children[i].getComponent("pokerCard");
-                pokerCard.canTouch = true;
+        let isMyTurn = data.turnPlayer === global.loginInfo.unionId;
+        let myCards = self.node.getChildByName("myCards");
+        for (let i = 0; i < myCards.children.length; i++) {
+            let pokerCard = myCards.children[i].getComponent("pokerCard");
+            pokerCard.canTouch = isMyTurn;
+        }
+
+        self.node.getChildByName("btnPlayCard").active = isMyTurn;
+    },
+    playCardClick(event, data) {
+        let self = this;
+        let myCards = self.node.getChildByName("myCards");
+        let selectedCard = [];
+        for (let i = 0; i < myCards.children.length; i++) {
+            let pokerCard = myCards.children[i].getComponent("pokerCard");
+
+            if (pokerCard.isTouched) {
+                selectedCard.push({suit: pokerCard.suit, number: pokerCard.number});
             }
         }
-    }
+
+        if (selectedCard.length === 0) {
+            utils.messageBox("提示", "请选择要出的牌");
+        }
+
+        if (selectedCard.length > 1) {
+            utils.messageBox("提示", "您只能选择一张牌");
+        }
+
+        console.log(selectedCard);
+        global.net.playCard(selectedCard, function (result) {
+            console.log(result);
+        });
+    },
 });
