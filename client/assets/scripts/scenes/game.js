@@ -61,7 +61,7 @@ cc.Class({
             cc.director.loadScene("lobby");
         });
     },
-    sortUserList(userList) {
+    getMyPosition(userList) {
         let me = -1;
         for (let i = 0; i < userList.length; i++) {
             if (userList[i].unionId === global.loginInfo.unionId) {
@@ -70,21 +70,7 @@ cc.Class({
             }
         }
 
-        if (me >= 0) {
-            let newList = [{}, {}, {}, {}];
-            for (let i = 0; i < userList.length; i++) {
-                let newIndex = me - i;
-                if (newIndex < 0) {
-                    newIndex += 4;
-                }
-
-                newList[newIndex] = userList[i];
-            }
-
-            return newList;
-        } else {
-            return userList;
-        }
+        return me;
     },
     updateInfo: function () {
         let self = this;
@@ -94,16 +80,19 @@ cc.Class({
                     e.active = false;
                 });
 
-                let newUserList = self.sortUserList(result.data.userList);
-
                 if (result.data.status === 1 && !self.isInitCards) {
                     self.initCards(self);
                 }
 
-                newUserList.forEach(function (e, i) {
+                let myPosition = self.getMyPosition(result.data.userList);
+
+                result.data.userList.forEach(function (e, i) {
+                    let showIndex = i - myPosition;
+                    if (showIndex < 0) showIndex += 4;
+
                     if (e.nickName) {
-                        let playerInfo = self.playerInfos[i].getComponent("playerInfo");
-                        self.playerInfos[i].active = true;
+                        let playerInfo = self.playerInfos[showIndex].getComponent("playerInfo");
+                        self.playerInfos[showIndex].active = true;
                         if (e.isOnline === 0) {
                             e.nickName = e.nickName + "(断线)";
                         }
@@ -112,7 +101,7 @@ cc.Class({
 
                         playerInfo.setReadyStatus(result.data.status === 0 && e.status === 1);
 
-                        if (i === 0) {
+                        if (showIndex === 0) {
                             self.node.getChildByName("btnReady").active = e.status !== 1;
                         }
                     }
@@ -194,6 +183,19 @@ cc.Class({
         }
 
         self.node.getChildByName("btnPlayCard").active = isMyTurn;
+
+        let turnCards = self.node.getChildByName("turnCards");
+        turnCards.removeAllChildren();
+
+        for (let i = 0; i < data.turnCards.length; i++) {
+            for (let j = 0; j < data.turnCards[i].length; j++) {
+                let showCard = cc.instantiate(self.pokerDemo);
+                let pokerScript = showCard.getComponent("pokerCard");
+                pokerScript.init(data.turnCards[i][j].suit, data.turnCards[i][j].number);
+                turnCards.addChild(showCard);
+            }
+        }
+
     },
     playCardClick(event, data) {
         let self = this;

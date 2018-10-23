@@ -154,9 +154,7 @@
     "_enabled": true,
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_spriteFrame": {
-      "__uuid__": "0d80f8eb-b4e9-43e5-9fb5-f552b321149c"
-    },
+    "_spriteFrame": null,
     "_type": 0,
     "_sizeMode": 1,
     "_fillType": 0,
@@ -256,9 +254,7 @@
     "_enabled": true,
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_spriteFrame": {
-      "__uuid__": "7ad371b3-e81c-4575-b906-51aa56df5a1c"
-    },
+    "_spriteFrame": null,
     "_type": 0,
     "_sizeMode": 1,
     "_fillType": 0,
@@ -327,6 +323,8 @@
     "pokerNumber": {
       "__id__": 6
     },
+    "suit": "",
+    "number": 0,
     "canTouch": false,
     "isTouched": false,
     "_id": ""

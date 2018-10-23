@@ -84,12 +84,16 @@ const gameManager = {
                         }
                     }
                 }
-                if(success === 1){
+                if (success === 1) {
+                    if (game.currentTurn.turnCards.length >= 4) {
+                        game.currentTurn.turnCards.splice(0, game.currentTurn.turnCards.length);
+                    }
+
                     game.currentTurn.turnCards.push(turnCard);
                     game.turn++;
-                    game.currentTurn.turnPlayer = game.players[Math.abs(game.firstDealerIndex - game.turn) % 4].unionId;
+                    game.currentTurn.turnPlayer = game.players[(game.firstDealerIndex + game.turn) % 4].unionId;
                     break;
-                } else{
+                } else {
                     console.log("can't find " + JSON.stringify(selectedCard));
                 }
             }
