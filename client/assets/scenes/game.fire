@@ -41,8 +41,8 @@
     },
     "_scale": {
       "__type__": "cc.Vec3",
-      "x": 0.5140569133280328,
-      "y": 0.5140569133280328,
+      "x": 0.7111111111111111,
+      "y": 0.7111111111111111,
       "z": 1
     },
     "_quat": {
@@ -1448,7 +1448,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 472,
-      "y": 50,
+      "y": 100,
       "z": 0
     },
     "_scale": {
@@ -3520,7 +3520,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": -489,
-      "y": 50,
+      "y": 100,
       "z": 0
     },
     "_scale": {
@@ -5327,7 +5327,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 0,
+      "y": 80,
       "z": 0
     },
     "_scale": {
@@ -5358,7 +5358,7 @@
     "node": {
       "__id__": 148
     },
-    "_enabled": true,
+    "_enabled": false,
     "_layoutSize": {
       "__type__": "cc.Size",
       "width": 300,
@@ -5427,6 +5427,7 @@
     },
     "isGameStart": false,
     "isInitCards": false,
+    "myPosition": 0,
     "_id": "028QiMs4lO6bR9yuEqsDbX"
   }
 ]

@@ -14,7 +14,8 @@ cc.Class({
             type: cc.Prefab
         },
         isGameStart: false,
-        isInitCards: false
+        isInitCards: false,
+        myPosition: 0
     },
     onLoad() {
         let self = this;
@@ -42,7 +43,7 @@ cc.Class({
             if (lastTurnInfo != null) {
                 this.updateTurn(self, lastTurnInfo);
             }
-        }, 1);
+        }, 0.3);
         self.node.getChildByName("btnPlayCard").active = false;
     },
     start() {
@@ -84,10 +85,10 @@ cc.Class({
                     self.initCards(self);
                 }
 
-                let myPosition = self.getMyPosition(result.data.userList);
+                self.myPosition = self.getMyPosition(result.data.userList);
 
                 result.data.userList.forEach(function (e, i) {
-                    let showIndex = i - myPosition;
+                    let showIndex = i - self.myPosition;
                     if (showIndex < 0) showIndex += 4;
 
                     if (e.nickName) {
@@ -188,10 +189,33 @@ cc.Class({
         turnCards.removeAllChildren();
 
         for (let i = 0; i < data.turnCards.length; i++) {
+
+            let offsetX = 0;
+            let offsetY = 0;
+
+            let showIndex = data.firstIndex - self.myPosition + i;
+            if (showIndex < 0) showIndex += 4;
+
+            switch (showIndex % 4) {
+                case 0:
+                    offsetY = -80;
+                    break;
+                case 1:
+                    offsetX = 100;
+                    break;
+                case 2:
+                    offsetY = 80;
+                    break;
+                case 3:
+                    offsetX = -100;
+                    break;
+            }
+
             for (let j = 0; j < data.turnCards[i].length; j++) {
                 let showCard = cc.instantiate(self.pokerDemo);
                 let pokerScript = showCard.getComponent("pokerCard");
                 pokerScript.init(data.turnCards[i][j].suit, data.turnCards[i][j].number);
+                showCard.setPosition(offsetX, offsetY);
                 turnCards.addChild(showCard);
             }
         }

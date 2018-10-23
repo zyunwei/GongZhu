@@ -32,6 +32,7 @@ const gameManager = {
         room.status = 1;
 
         newGame.currentTurn = {
+            firstIndex : newGame.firstDealerIndex,
             turnPlayer: newGame.players[newGame.firstDealerIndex].unionId,
             turnCards: [],
             turnTimeout: 20
