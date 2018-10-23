@@ -32,7 +32,7 @@ const gameManager = {
         room.status = 1;
 
         newGame.currentTurn = {
-            firstIndex : newGame.firstDealerIndex,
+            firstIndex: newGame.firstDealerIndex,
             turnPlayer: newGame.players[newGame.firstDealerIndex].unionId,
             turnCards: [],
             turnTimeout: 20
@@ -86,13 +86,16 @@ const gameManager = {
                     }
                 }
                 if (success === 1) {
-                    if (game.currentTurn.turnCards.length >= 4) {
-                        game.currentTurn.turnCards.splice(0, game.currentTurn.turnCards.length);
-                    }
-
-                    game.currentTurn.turnCards.push(turnCard);
                     game.turn++;
-                    game.currentTurn.turnPlayer = game.players[(game.firstDealerIndex + game.turn) % 4].unionId;
+                    game.currentTurn.turnCards.push(turnCard);
+                    if (game.currentTurn.turnCards.length >= 4) {
+                        let bigPlayerIndex = cardManager.getBigPlayerIndex(game.currentTurn.turnCards);
+                        game.currentTurn.turnCards.splice(0, game.currentTurn.turnCards.length);
+                        game.currentTurn.firstIndex = (game.currentTurn.firstIndex + bigPlayerIndex) % 4;
+                        game.currentTurn.turnPlayer = game.players[game.currentTurn.firstIndex].unionId;
+                    } else {
+                        game.currentTurn.turnPlayer = game.players[(game.currentTurn.firstIndex + game.currentTurn.turnCards.length) % 4].unionId;
+                    }
                     break;
                 } else {
                     console.log("can't find " + JSON.stringify(selectedCard));

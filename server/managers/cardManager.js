@@ -47,9 +47,9 @@ const cardManager = {
         for (let i = 0; i < cards.length; i++) {
             for (let j = 0; j < cards[i].length; j++) {
                 suits.forEach(function (e, score) {
-                    if (cards[i][j].suit == e) {
+                    if (cards[i][j].suit === e) {
                         let numberScore = cards[i][j].number;
-                        if (numberScore == 1) {
+                        if (numberScore === 1) {
                             numberScore = 14;
                         }
                         cards[i][j].score = score * 100 + numberScore;
@@ -77,6 +77,29 @@ const cardManager = {
         }
 
         return cards;
+    },
+    getBigPlayerIndex(turnCards){
+        // 每轮牌大小比较，找出最大的出牌玩家序号
+        if(turnCards.length !== 4){
+            return -1;
+        }
+
+        let firstSuit = turnCards[0][0].suit;
+        let bigIndex = 0;
+        let bigNumberScore = this.getNumberScore(turnCards[0][0].number);
+
+        for(let i = 1; i < 4; i++){
+            if(turnCards[i][0].suit === firstSuit &&
+                this.getNumberScore(turnCards[i][0].number) > bigNumberScore){
+                bigNumberScore = this.getNumberScore(turnCards[i][0].number);
+                bigIndex = i;
+            }
+        }
+
+        return bigIndex;
+    },
+    getNumberScore(cardNumber){
+        return cardNumber === 1 ? 14 : cardNumber;
     }
 };
 
