@@ -13,6 +13,10 @@ cc.Class({
             default: null,
             type: cc.Prefab
         },
+        smallPokerDemo: {
+            default: null,
+            type: cc.Prefab
+        },
         isGameStart: false,
         isInitCards: false,
         myPosition: 0,
@@ -209,15 +213,14 @@ cc.Class({
 
         // 判断本地回合数据是否是新数据，不为最新则清空桌面
         if (self.localTurnCards.length > 0) {
-            if (currentTurn.turnCards.length === 0 || currentTurn.turnCards[0][0].suit !== self.localTurnCards[0][0].suit ||
-                currentTurn.turnCards[0][0].number !== self.localTurnCards[0][0].number) {
+            if (currentTurn.turnCards.length === 0 || currentTurn.turnCards[0].suit !== self.localTurnCards[0].suit ||
+                currentTurn.turnCards[0].number !== self.localTurnCards[0].number) {
                 self.localTurnCards.splice(0, self.localTurnCards.length);
                 // 一轮结束，桌上的牌往下一轮出牌人的方向飞过去
-                if (currentTurn.turnCards.length === 0)
-                {
+                if (currentTurn.turnCards.length === 0) {
                     let flyX, flyY = 0;
-                    let flyPosition =currentTurn.firstIndex - self.myPosition;
-                    if(flyPosition < 0) flyPosition += 4;
+                    let flyPosition = currentTurn.firstIndex - self.myPosition;
+                    if (flyPosition < 0) flyPosition += 4;
                     switch (flyPosition) {
                         case 0 :
                             flyX = 0;
@@ -245,7 +248,7 @@ cc.Class({
                         turnCards.removeAllChildren()
                     }, 1);
                 }
-                else{
+                else {
                     turnCards.removeAllChildren();
                 }
             }
@@ -280,34 +283,64 @@ cc.Class({
                     break;
             }
 
-            for (let j = 0; j < currentTurn.turnCards[i].length; j++) {
-                let showCard = cc.instantiate(self.pokerDemo);
-                let pokerScript = showCard.getComponent("pokerCard");
-                pokerScript.init(currentTurn.turnCards[i][j].suit, currentTurn.turnCards[i][j].number);
-                showCard.setPosition(offsetX, offsetY);
-                turnCards.addChild(showCard);
+            let showCard = cc.instantiate(self.pokerDemo);
+            let pokerScript = showCard.getComponent("pokerCard");
+            pokerScript.init(currentTurn.turnCards[i].suit, currentTurn.turnCards[i].number);
+            showCard.setPosition(offsetX, offsetY);
+            turnCards.addChild(showCard);
+        }
+
+        // 得牌显示
+        for (let i = 0; i < currentTurn.pointCards.length; i++) {
+            let showIndex = i - self.myPosition;
+            if (showIndex < 0) showIndex += 4;
+
+            let pointCardsBox = null;
+            switch (showIndex) {
+                case 0:
+                    pointCardsBox = self.node.getChildByName("pointCardsSouth");
+                    break;
+                case 1:
+                    pointCardsBox = self.node.getChildByName("pointCardsEast");
+                    break;
+                case 2:
+                    pointCardsBox = self.node.getChildByName("pointCardsNorth");
+                    break;
+                case 3:
+                    pointCardsBox = self.node.getChildByName("pointCardsWest");
+                    break;
+            }
+
+            if (pointCardsBox != null) {
+                pointCardsBox.removeAllChildren(true);
+
+                for (let card of currentTurn.pointCards[i]) {
+                    let showCard = cc.instantiate(self.smallPokerDemo);
+                    let pokerScript = showCard.getComponent("pokerCard");
+                    pokerScript.init(card.suit, card.number);
+                    showCard.parent = pointCardsBox;
+                }
             }
         }
     },
     playCardClick(event, data) {
         let self = this;
         let myCards = self.node.getChildByName("myCards");
-        let selectedCard = [];
+        let selectedCard = null;
         for (let i = 0; i < myCards.children.length; i++) {
             let pokerCard = myCards.children[i].getComponent("pokerCard");
 
             if (pokerCard.isTouched) {
-                selectedCard.push({suit: pokerCard.suit, number: pokerCard.number});
+                if (selectedCard != null) {
+                    utils.messageBox("提示", "您只能选择一张牌");
+                    return;
+                }
+                selectedCard = {suit: pokerCard.suit, number: pokerCard.number};
             }
         }
 
-        if (selectedCard.length === 0) {
+        if (!selectedCard) {
             utils.messageBox("提示", "请选择要出的牌");
-            return;
-        }
-
-        if (selectedCard.length > 1) {
-            utils.messageBox("提示", "您只能选择一张牌");
             return;
         }
 

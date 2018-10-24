@@ -34,17 +34,22 @@ cc.Class({
         numberImg += suit === 'heart' || suit === 'diamond' ? 'r' : 'b';
         numberImg += number;
         cc.loader.loadRes(suitImg, cc.SpriteFrame, function (err, sprite) {
-            self.pokerSuit.getComponent(cc.Sprite).spriteFrame = sprite;
+            let spr = self.pokerSuit.getComponent(cc.Sprite);
+            if(spr) spr.spriteFrame = sprite;
         });
 
         cc.loader.loadRes(numberImg, cc.SpriteFrame, function (err, sprite) {
-            self.pokerNumber.getComponent(cc.Sprite).spriteFrame = sprite;
+            let spr = self.pokerNumber.getComponent(cc.Sprite);
+            if(spr) spr.spriteFrame = sprite;
         });
 
         this.setDisableMask(false);
     },
     setDisableMask(isDisabled){
-        this.node.getChildByName("disableMask").active = isDisabled;
+        let mask = this.node.getChildByName("disableMask");
+        if(mask){
+            this.node.getChildByName("disableMask").active = isDisabled;
+        }
     },
     handleControl() {
         let self = this;

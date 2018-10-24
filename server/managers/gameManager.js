@@ -19,7 +19,7 @@ const gameManager = {
         room.players.forEach(function (e, i) {
             newGame.players.push({
                 unionId: e.unionId,
-                cards: cards[i],
+                cards: cards[i]
             });
             cards[i].some(function (ee, ii) {
                 if (ee.suit === "club" && ee.number === 2) {
@@ -36,7 +36,8 @@ const gameManager = {
             turnPlayer: newGame.players[newGame.firstDealerIndex].unionId,
             turnCards: [],
             turnTimeout: 20,
-            firstSuit: ''
+            firstSuit: '',
+            pointCards: [[], [], [], []]
         };
 
         global.games.push(newGame);
@@ -48,25 +49,25 @@ const gameManager = {
         io.in("lobby").emit("notify", {type: "updateLobby"});
     },
     getGameByRoomNo(roomNo) {
-        for (let i = 0; i < global.rooms.length; i++) {
-            if (global.rooms[i].no === roomNo) {
-                return this.getGameByGameId(global.rooms[i].gameId);
+        for (let room of global.rooms) {
+            if (room.no === roomNo) {
+                return this.getGameByGameId(room.gameId);
             }
         }
         return null;
     },
     getGameByGameId(gameId) {
-        for (let i = 0; i < global.games.length; i++) {
-            if (global.games[i].gameId === gameId) {
-                return global.games[i];
+        for (let game of global.games) {
+            if (game.gameId === gameId) {
+                return game;
             }
         }
         return null;
     },
     getCardInfo(game, unionId) {
-        for (let i = 0; i < game.players.length; i++) {
-            if (game.players[i].unionId === unionId) {
-                return game.players[i].cards;
+        for (let player of game.players) {
+            if (player.unionId === unionId) {
+                return player.cards;
             }
         }
         return [];
@@ -75,22 +76,20 @@ const gameManager = {
         let success = 0;
         for (let i = 0; i < game.players.length; i++) {
             if (game.players[i].unionId === unionId) {
-                let turnCard = [];
+                let turnCard = null;
                 for (let j = game.players[i].cards.length - 1; j >= 0; j--) {
-                    for (let k = 0; k < selectedCard.length; k++) {
-                        if (game.players[i].cards[j].number === selectedCard[k].number &&
-                            game.players[i].cards[j].suit === selectedCard[k].suit) {
-                            turnCard.push(game.players[i].cards[j]);
-                            game.players[i].cards.splice(j, 1);
-                            success = 1;
-                        }
+                    if (game.players[i].cards[j].number === selectedCard.number &&
+                        game.players[i].cards[j].suit === selectedCard.suit) {
+                        turnCard = game.players[i].cards[j];
+                        game.players[i].cards.splice(j, 1);
+                        success = 1;
                     }
                 }
                 if (success === 1) {
                     game.turn++;
                     game.currentTurn.turnCards.push(turnCard);
-                    if(game.currentTurn.firstSuit === ''){
-                        game.currentTurn.firstSuit = turnCard[0].suit;
+                    if (game.currentTurn.firstSuit === '') {
+                        game.currentTurn.firstSuit = turnCard.suit;
                     }
 
                     if (game.currentTurn.turnCards.length >= 4) {
@@ -111,6 +110,11 @@ const gameManager = {
         return success === 1;
     },
     startNewTurn(game, bigPlayerIndex) {
+        let pointCards = cardManager.getPointCards(game.currentTurn.turnCards);
+        for (let card of pointCards) {
+            game.currentTurn.pointCards[(game.currentTurn.firstIndex + bigPlayerIndex) % 4].push(card);
+        }
+
         game.currentTurn.turnCards.splice(0, game.currentTurn.turnCards.length);
         game.currentTurn.firstIndex = (game.currentTurn.firstIndex + bigPlayerIndex) % 4;
         game.currentTurn.turnPlayer = game.players[game.currentTurn.firstIndex].unionId;

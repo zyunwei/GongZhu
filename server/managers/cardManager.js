@@ -127,14 +127,14 @@ const cardManager = {
             return -1;
         }
 
-        let firstSuit = turnCards[0][0].suit;
+        let firstSuit = turnCards[0].suit;
         let bigIndex = 0;
-        let bigNumberScore = this.getNumberScore(turnCards[0][0].number);
+        let bigNumberScore = this.getNumberScore(turnCards[0].number);
 
         for (let i = 1; i < 4; i++) {
-            if (turnCards[i][0].suit === firstSuit &&
-                this.getNumberScore(turnCards[i][0].number) > bigNumberScore) {
-                bigNumberScore = this.getNumberScore(turnCards[i][0].number);
+            if (turnCards[i].suit === firstSuit &&
+                this.getNumberScore(turnCards[i].number) > bigNumberScore) {
+                bigNumberScore = this.getNumberScore(turnCards[i].number);
                 bigIndex = i;
             }
         }
@@ -145,7 +145,13 @@ const cardManager = {
         return cardNumber === 1 ? 14 : cardNumber;
     },
     getPointCards(turnCards){
-
+        let pointCards = [];
+        for(let card of turnCards){
+            if(card.ex !== ''){
+                pointCards.push(card);
+            }
+        }
+        return pointCards;
     }
 };
 
