@@ -12,16 +12,16 @@ cc.Class({
         global.net.init();
         global.loginInfo = {};
     },
-    onLoad(){
+    onLoad() {
         this.setButtonState(false);
-        this.schedule(function(){
-            if(this.lblTitle.string !== this.startTitle && global.net.socket != null){
+        this.schedule(function () {
+            if (this.lblTitle.string !== this.startTitle && global.net.socket != null) {
                 this.lblTitle.string = this.startTitle;
                 this.setButtonState(true);
             }
-        },1);
+        }, 0.3);
     },
-    setButtonState(enabled){
+    setButtonState(enabled) {
         this.node.children.forEach(function (e) {
             let btn = e.getComponent(cc.Button);
             if (btn) {

@@ -15,7 +15,8 @@ cc.Class({
         },
         isGameStart: false,
         isInitCards: false,
-        myPosition: 0
+        myPosition: 0,
+        localTurnCards: [],
     },
     onLoad() {
         let self = this;
@@ -165,35 +166,103 @@ cc.Class({
             }
         });
     },
-    updateTurn(self, data) {
-        console.log(data);
-
+    updateTurn(self, currentTurn) {
+        // 设置倒计时
         for (let i = 0; i < self.playerInfos.length; i++) {
             let playerInfo = self.playerInfos[i].getComponent("playerInfo");
             playerInfo.setCountdown(0);
-            if (data.turnPlayer === playerInfo.unionId) {
-                playerInfo.setCountdown(data.turnTimeout);
+            if (currentTurn.turnPlayer === playerInfo.unionId) {
+                playerInfo.setCountdown(currentTurn.turnTimeout);
             }
         }
 
-        let isMyTurn = data.turnPlayer === global.loginInfo.unionId;
+        let isMyTurn = currentTurn.turnPlayer === global.loginInfo.unionId;
         let myCards = self.node.getChildByName("myCards");
+
+        // 查询所有牌中有没有当前轮的花色
+        let hasTurnSuit = false;
         for (let i = 0; i < myCards.children.length; i++) {
             let pokerCard = myCards.children[i].getComponent("pokerCard");
+            if (pokerCard.suit === currentTurn.firstSuit) {
+                hasTurnSuit = true;
+                break;
+            }
+        }
+
+        // 设置可选牌范围
+        for (let i = 0; i < myCards.children.length; i++) {
+            let pokerCard = myCards.children[i].getComponent("pokerCard");
+            pokerCard.setDisableMask(false);
             pokerCard.canTouch = isMyTurn;
+            if (isMyTurn && hasTurnSuit) {
+                let canSelect = currentTurn.firstSuit === '' || (currentTurn.firstSuit !== ''
+                    && pokerCard.suit === currentTurn.firstSuit);
+                if (!canSelect)
+                    pokerCard.canTouch = false;
+                pokerCard.setDisableMask(!canSelect);
+            }
         }
 
         self.node.getChildByName("btnPlayCard").active = isMyTurn;
 
         let turnCards = self.node.getChildByName("turnCards");
-        turnCards.removeAllChildren();
 
-        for (let i = 0; i < data.turnCards.length; i++) {
+        // 判断本地回合数据是否是新数据，不为最新则清空桌面
+        if (self.localTurnCards.length > 0) {
+            if (currentTurn.turnCards.length === 0 || currentTurn.turnCards[0][0].suit !== self.localTurnCards[0][0].suit ||
+                currentTurn.turnCards[0][0].number !== self.localTurnCards[0][0].number) {
+                self.localTurnCards.splice(0, self.localTurnCards.length);
+                // 一轮结束，桌上的牌往下一轮出牌人的方向飞过去
+                if (currentTurn.turnCards.length === 0)
+                {
+                    let flyX, flyY = 0;
+                    let flyPosition =currentTurn.firstIndex - self.myPosition;
+                    if(flyPosition < 0) flyPosition += 4;
+                    switch (flyPosition) {
+                        case 0 :
+                            flyX = 0;
+                            flyY = -cc.winSize.height;
+                            break;
+                        case 1 :
+                            flyX = cc.winSize.width;
+                            flyY = 0;
+                            break;
+                        case 2 :
+                            flyX = 0;
+                            flyY = cc.winSize.height;
+                            break;
+                        case 3 :
+                            flyX = -cc.winSize.width;
+                            flyY = 0;
+                            break;
+                    }
+
+                    for (let i = 0; i < turnCards.children.length; i++) {
+                        let action = cc.moveTo(0.5, flyX, flyY);
+                        turnCards.children[i].runAction(action.easing(cc.easeIn(5)));
+                    }
+                    self.scheduleOnce(function () {
+                        turnCards.removeAllChildren()
+                    }, 1);
+                }
+                else{
+                    turnCards.removeAllChildren();
+                }
+            }
+        }
+
+        for (let i = 0; i < currentTurn.turnCards.length; i++) {
+            if (self.localTurnCards.length - 1 >= i) {
+                // 已经绘制过，跳过
+                continue;
+            }
+
+            self.localTurnCards.push(currentTurn.turnCards[i]);
 
             let offsetX = 0;
             let offsetY = 0;
 
-            let showIndex = data.firstIndex - self.myPosition + i;
+            let showIndex = currentTurn.firstIndex - self.myPosition + i;
             if (showIndex < 0) showIndex += 4;
 
             switch (showIndex % 4) {
@@ -211,15 +280,14 @@ cc.Class({
                     break;
             }
 
-            for (let j = 0; j < data.turnCards[i].length; j++) {
+            for (let j = 0; j < currentTurn.turnCards[i].length; j++) {
                 let showCard = cc.instantiate(self.pokerDemo);
                 let pokerScript = showCard.getComponent("pokerCard");
-                pokerScript.init(data.turnCards[i][j].suit, data.turnCards[i][j].number);
+                pokerScript.init(currentTurn.turnCards[i][j].suit, currentTurn.turnCards[i][j].number);
                 showCard.setPosition(offsetX, offsetY);
                 turnCards.addChild(showCard);
             }
         }
-
     },
     playCardClick(event, data) {
         let self = this;

@@ -13,7 +13,8 @@ cc.Class({
         suit: '',
         number: 0,
         canTouch: false,
-        isTouched: false
+        isTouched: false,
+        disabled : false
     },
     onLoad() {
         this.handleControl();
@@ -21,7 +22,7 @@ cc.Class({
     start() {
 
     },
-    init: function (suit, number) {
+    init(suit, number) {
         this.suit = suit;
         this.number = number;
         if (number < 10) {
@@ -39,8 +40,13 @@ cc.Class({
         cc.loader.loadRes(numberImg, cc.SpriteFrame, function (err, sprite) {
             self.pokerNumber.getComponent(cc.Sprite).spriteFrame = sprite;
         });
+
+        this.setDisableMask(false);
     },
-    handleControl: function () {
+    setDisableMask(isDisabled){
+        this.node.getChildByName("disableMask").active = isDisabled;
+    },
+    handleControl() {
         let self = this;
         this.node.on(cc.Node.EventType.TOUCH_START, function (event) {
             if (self.canTouch) {
@@ -49,7 +55,7 @@ cc.Class({
             }
         }, this);
     },
-    handleResponse: function (isTouched) {
+    handleResponse(isTouched) {
         if (isTouched) {
             this.node.runAction(cc.moveBy(0.2, 0, -30));
         } else {

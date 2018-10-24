@@ -27,7 +27,7 @@ const net = function () {
         });
 
         _io.on("notify", function (data) {
-            console.log("notify:" + JSON.stringify(data) + Math.random());
+            //console.log("notify:" + JSON.stringify(data) + Math.random());
             switch(data.type){
                 case "updateLobby":
                     global.lobbyNeedUpdate = 1;

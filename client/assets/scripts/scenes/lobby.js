@@ -17,7 +17,7 @@ cc.Class({
             if(global.lobbyNeedUpdate === 1){
                 this.updateInfo();
             }
-        }, 1);
+        }, 0.3);
     },
     start() {
         if (!global.net.socket) {

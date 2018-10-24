@@ -35,7 +35,8 @@ const gameManager = {
             firstIndex: newGame.firstDealerIndex,
             turnPlayer: newGame.players[newGame.firstDealerIndex].unionId,
             turnCards: [],
-            turnTimeout: 20
+            turnTimeout: 20,
+            firstSuit: ''
         };
 
         global.games.push(newGame);
@@ -88,22 +89,36 @@ const gameManager = {
                 if (success === 1) {
                     game.turn++;
                     game.currentTurn.turnCards.push(turnCard);
+                    if(game.currentTurn.firstSuit === ''){
+                        game.currentTurn.firstSuit = turnCard[0].suit;
+                    }
+
                     if (game.currentTurn.turnCards.length >= 4) {
                         let bigPlayerIndex = cardManager.getBigPlayerIndex(game.currentTurn.turnCards);
-                        game.currentTurn.turnCards.splice(0, game.currentTurn.turnCards.length);
-                        game.currentTurn.firstIndex = (game.currentTurn.firstIndex + bigPlayerIndex) % 4;
-                        game.currentTurn.turnPlayer = game.players[game.currentTurn.firstIndex].unionId;
+                        let self = this;
+                        setTimeout(function () {
+                            self.startNewTurn(game, bigPlayerIndex);
+                        }, 2000);
+                        game.currentTurn.turnPlayer = -1;
                     } else {
                         game.currentTurn.turnPlayer = game.players[(game.currentTurn.firstIndex + game.currentTurn.turnCards.length) % 4].unionId;
                     }
                     break;
-                } else {
-                    console.log("can't find " + JSON.stringify(selectedCard));
                 }
             }
         }
 
         return success === 1;
+    },
+    startNewTurn(game, bigPlayerIndex) {
+        game.currentTurn.turnCards.splice(0, game.currentTurn.turnCards.length);
+        game.currentTurn.firstIndex = (game.currentTurn.firstIndex + bigPlayerIndex) % 4;
+        game.currentTurn.turnPlayer = game.players[game.currentTurn.firstIndex].unionId;
+        game.currentTurn.firstSuit = '';
+        global.io.in("room" + game.roomNo).emit("notify", {
+            type: "updateTurn",
+            data: game.currentTurn
+        });
     }
 };
 

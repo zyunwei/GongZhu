@@ -4,9 +4,10 @@ import gameManager from './managers/gameManager';
 
 const io = require('socket.io')(3000);
 
+global.io = io;
 global.logger.info("服务器已启动");
 
-io.on('connection', function (socket) {
+global.io.on('connection', function (socket) {
     socket.on('disconnect', function () {
         userManager.userDisconnect(socket);
     });
@@ -223,7 +224,7 @@ io.on('connection', function (socket) {
                             gameManager.startGame(io, global.rooms[i]);
                         }
 
-                        io.in("room" + global.rooms[i].no).emit("notify", {type: "updateRoom"});
+                        global.io.in("room" + global.rooms[i].no).emit("notify", {type: "updateRoom"});
                         response({success: "1", message: "", data: {}});
 
                         return;
@@ -292,7 +293,7 @@ io.on('connection', function (socket) {
             return;
         }
 
-        io.in("room" + room.no).emit("notify", {
+        global.io.in("room" + room.no).emit("notify", {
             type: "updateTurn",
             data: game.currentTurn
         });
