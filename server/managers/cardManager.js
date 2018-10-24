@@ -2,11 +2,54 @@ const cardManager = {
     getAllCard() {
         // 获得所有牌
         let cards = [];
+        let suits = ['spade', 'heart', 'diamond', 'club'];
         for (let i = 1; i <= 13; i++) {
-            cards.push({number: i, suit: 'spade'});
-            cards.push({number: i, suit: 'heart'});
-            cards.push({number: i, suit: 'diamond'});
-            cards.push({number: i, suit: 'club'});
+            for (let suit of suits) {
+                let cardInfo = {number: i, suit: suit, point: 0, ex: ''};
+
+                if (suit === 'spade' && i === 12) {
+                    cardInfo.point = -100;
+                    cardInfo.ex = 'pig';
+                } else if (suit === 'diamond' && i === 11) {
+                    cardInfo.point = 100;
+                    cardInfo.ex = 'sheep';
+                }
+                else if (suit === 'club' && i === 10) {
+                    cardInfo.point = 50;
+                    cardInfo.ex = 'double';
+                } else if( suit == 'heart'){
+                    cardInfo.ex = 'point';
+                    switch (i) {
+                        case 1:
+                            cardInfo.point = 50;
+                            break;
+                        case 2:
+                        case 3:
+                        case 4:
+                            cardInfo.point = 0;
+                            break;
+                        case 5:
+                        case 6:
+                        case 7:
+                        case 8:
+                        case 9:
+                        case 10:
+                            cardInfo.point = 10;
+                            break;
+                        case 11:
+                            cardInfo.point = 20;
+                            break;
+                        case 12:
+                            cardInfo.point = 30;
+                            break;
+                        case 13:
+                            cardInfo.point = 40;
+                            break;
+                    }
+                }
+
+                cards.push(cardInfo);
+            }
         }
 
         return cards;
@@ -78,9 +121,9 @@ const cardManager = {
 
         return cards;
     },
-    getBigPlayerIndex(turnCards){
+    getBigPlayerIndex(turnCards) {
         // 每轮牌大小比较，找出最大的出牌玩家序号
-        if(turnCards.length !== 4){
+        if (turnCards.length !== 4) {
             return -1;
         }
 
@@ -88,9 +131,9 @@ const cardManager = {
         let bigIndex = 0;
         let bigNumberScore = this.getNumberScore(turnCards[0][0].number);
 
-        for(let i = 1; i < 4; i++){
-            if(turnCards[i][0].suit === firstSuit &&
-                this.getNumberScore(turnCards[i][0].number) > bigNumberScore){
+        for (let i = 1; i < 4; i++) {
+            if (turnCards[i][0].suit === firstSuit &&
+                this.getNumberScore(turnCards[i][0].number) > bigNumberScore) {
                 bigNumberScore = this.getNumberScore(turnCards[i][0].number);
                 bigIndex = i;
             }
@@ -98,8 +141,11 @@ const cardManager = {
 
         return bigIndex;
     },
-    getNumberScore(cardNumber){
+    getNumberScore(cardNumber) {
         return cardNumber === 1 ? 14 : cardNumber;
+    },
+    getPointCards(turnCards){
+
     }
 };
 
