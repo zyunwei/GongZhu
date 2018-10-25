@@ -21,9 +21,11 @@ cc.Class({
         isInitCards: false,
         myPosition: 0,
         localTurnCards: [],
+        localPointCards:[]
     },
     onLoad() {
         let self = this;
+        self.localPointCards = [[],[],[],[]];
         this.schedule(function () {
             let lastUpdate = null;
             let lastTurnInfo = null;
@@ -312,12 +314,21 @@ cc.Class({
             }
 
             if (pointCardsBox != null) {
-                pointCardsBox.removeAllChildren(true);
-
-                for (let card of currentTurn.pointCards[i]) {
+                for (let j = 0; j < currentTurn.pointCards[i].length; j++) {
+                    let localExist = false;
+                    for (let card of self.localPointCards[i]) {
+                        if (card.suit === currentTurn.pointCards[i][j].suit && card.number === currentTurn.pointCards[i][j].number) {
+                            localExist = true;
+                            break;
+                        }
+                    }
+                    if (localExist) {
+                        continue;
+                    }
+                    self.localPointCards[i].push(currentTurn.pointCards[i][j]);
                     let showCard = cc.instantiate(self.smallPokerDemo);
                     let pokerScript = showCard.getComponent("pokerCard");
-                    pokerScript.init(card.suit, card.number);
+                    pokerScript.init(currentTurn.pointCards[i][j].suit, currentTurn.pointCards[i][j].number);
                     showCard.parent = pointCardsBox;
                 }
             }
