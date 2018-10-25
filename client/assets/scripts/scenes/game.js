@@ -176,7 +176,7 @@ cc.Class({
         // 设置倒计时
         for (let i = 0; i < self.playerInfos.length; i++) {
             let playerInfo = self.playerInfos[i].getComponent("playerInfo");
-            playerInfo.setCountdown(0);
+            playerInfo.setCountdown(-1);
             if (currentTurn.turnPlayer === playerInfo.unionId) {
                 playerInfo.setCountdown(currentTurn.turnTimeout);
             }
@@ -220,50 +220,44 @@ cc.Class({
                 currentTurn.turnCards[0].number !== self.localTurnCards[0].number) {
                 self.localTurnCards.splice(0, self.localTurnCards.length);
                 // 一轮结束，桌上的牌往下一轮出牌人的方向飞过去
-                if (currentTurn.turnCards.length === 0) {
-                    let flyX, flyY = 0;
-                    let flyPosition = currentTurn.firstIndex - self.myPosition;
-                    if (flyPosition < 0) flyPosition += 4;
-                    switch (flyPosition) {
-                        case 0 :
-                            flyX = 0;
-                            flyY = -cc.winSize.height;
-                            break;
-                        case 1 :
-                            flyX = cc.winSize.width;
-                            flyY = 0;
-                            break;
-                        case 2 :
-                            flyX = 0;
-                            flyY = cc.winSize.height;
-                            break;
-                        case 3 :
-                            flyX = -cc.winSize.width;
-                            flyY = 0;
-                            break;
-                    }
+                // 将牌桌牌复制一份用于动画过度
+                let copyTurnCards = cc.instantiate(turnCards);
+                copyTurnCards.name = "copyTurnCards";
+                self.node.addChild(copyTurnCards);
 
-                    for (let i = 0; i < turnCards.children.length; i++) {
-                        let action = cc.moveTo(0.5, flyX, flyY);
-                        turnCards.children[i].runAction(action.easing(cc.easeIn(5)));
-                    }
-                    // 删掉飞出去的牌
-                    self.scheduleOnce(function () {
-                        for (let i = turnCards.children.length - 1; i >= 0; i--) {
-                            if (turnCards.children[i].position.x <= 0 || turnCards.children[i].position.y <= 0 ||
-                                turnCards.children[i].position.x >= cc.winSize.width ||
-                                turnCards.children[i].position.y >= cc.winSize.height) {
-                                turnCards.children[i].destroy();
-                                turnCards.children.splice(i, 0);
-                            }
-                        }
+                let flyX, flyY = 0;
+                let flyPosition = currentTurn.firstIndex - self.myPosition;
+                if (flyPosition < 0) flyPosition += 4;
+                switch (flyPosition) {
+                    case 0 :
+                        flyX = 0;
+                        flyY = -cc.winSize.height;
+                        break;
+                    case 1 :
+                        flyX = cc.winSize.width;
+                        flyY = 0;
+                        break;
+                    case 2 :
+                        flyX = 0;
+                        flyY = cc.winSize.height;
+                        break;
+                    case 3 :
+                        flyX = -cc.winSize.width;
+                        flyY = 0;
+                        break;
+                }
 
-                        turnCards.removeAllChildren()
-                    }, 1);
+                for (let i = 0; i < copyTurnCards.children.length; i++) {
+                    let action = cc.moveTo(0.5, flyX, flyY);
+                    copyTurnCards.children[i].runAction(action.easing(cc.easeIn(5)));
                 }
-                else {
-                    turnCards.removeAllChildren();
-                }
+                // 删掉飞出去的牌
+                self.scheduleOnce(function () {
+                    copyTurnCards.removeAllChildren();
+                    copyTurnCards.destroy();
+                }, 1);
+
+                turnCards.removeAllChildren();
             }
         }
 

@@ -14,7 +14,6 @@ setInterval(function(){
             game.currentTurn.turnTimeout -= 1;
         } else{
             // todo:  自动出牌
-            console.log(game.roomNo + ":自动出牌" + new Date());
         }
     }
 },1000);

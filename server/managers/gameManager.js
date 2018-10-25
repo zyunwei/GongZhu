@@ -102,6 +102,7 @@ const gameManager = {
                     } else {
                         game.currentTurn.turnPlayer = game.players[(game.currentTurn.firstIndex + game.currentTurn.turnCards.length) % 4].unionId;
                     }
+                    game.currentTurn.turnTimeout = 20;
                     break;
                 }
             }

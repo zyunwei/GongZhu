@@ -1,5 +1,3 @@
-import global from "../global";
-
 cc.Class({
     extends: cc.Component,
 
@@ -8,11 +6,11 @@ cc.Class({
         lblMoney: cc.Label,
         lblCountDown: cc.Label,
         jsq: cc.Node,
-        unionId: ""
+        unionId: "",
+        countdownNumber: -1,
     },
-    countdownNumber: 0,
     start() {
-        this.setCountdown(0);
+        this.setCountdown(-1);
         this.schedule(function () {
             if (this.countdownNumber > 0) {
                 this.countdownNumber -= 1;
@@ -32,7 +30,7 @@ cc.Class({
     setCountdown(second) {
         this.countdownNumber = second;
         this.lblCountDown.string = second;
-        if (second <= 0) {
+        if (second < 0) {
             this.lblCountDown.node.active = false;
             this.jsq.active = false;
         }
