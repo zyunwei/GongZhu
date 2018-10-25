@@ -7,6 +7,18 @@ const io = require('socket.io')(3000);
 global.io = io;
 global.logger.info("服务器已启动");
 
+// 服务端倒计时控制
+setInterval(function(){
+    for(let game of global.games){
+        if(game.currentTurn.turnTimeout > 0  && game.currentTurn.turnCards.length > 0){
+            game.currentTurn.turnTimeout -= 1;
+        } else{
+            // todo:  自动出牌
+            console.log(game.roomNo + ":自动出牌" + new Date());
+        }
+    }
+},1000);
+
 global.io.on('connection', function (socket) {
     socket.on('disconnect', function () {
         userManager.userDisconnect(socket);
@@ -221,7 +233,7 @@ global.io.on('connection', function (socket) {
                         }
 
                         if (readyCount >= 4) {
-                            gameManager.startGame(io, global.rooms[i]);
+                            gameManager.startGame(global.rooms[i]);
                         }
 
                         global.io.in("room" + global.rooms[i].no).emit("notify", {type: "updateRoom"});

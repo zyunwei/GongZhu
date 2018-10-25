@@ -21,11 +21,11 @@ cc.Class({
         isInitCards: false,
         myPosition: 0,
         localTurnCards: [],
-        localPointCards:[]
+        localPointCards: []
     },
     onLoad() {
         let self = this;
-        self.localPointCards = [[],[],[],[]];
+        self.localPointCards = [[], [], [], []];
         this.schedule(function () {
             let lastUpdate = null;
             let lastTurnInfo = null;
@@ -215,7 +215,8 @@ cc.Class({
 
         // 判断本地回合数据是否是新数据，不为最新则清空桌面
         if (self.localTurnCards.length > 0) {
-            if (currentTurn.turnCards.length === 0 || currentTurn.turnCards[0].suit !== self.localTurnCards[0].suit ||
+            if (currentTurn.turnCards.length === 0 ||
+                currentTurn.turnCards[0].suit !== self.localTurnCards[0].suit ||
                 currentTurn.turnCards[0].number !== self.localTurnCards[0].number) {
                 self.localTurnCards.splice(0, self.localTurnCards.length);
                 // 一轮结束，桌上的牌往下一轮出牌人的方向飞过去
@@ -246,7 +247,17 @@ cc.Class({
                         let action = cc.moveTo(0.5, flyX, flyY);
                         turnCards.children[i].runAction(action.easing(cc.easeIn(5)));
                     }
+                    // 删掉飞出去的牌
                     self.scheduleOnce(function () {
+                        for (let i = turnCards.children.length - 1; i >= 0; i--) {
+                            if (turnCards.children[i].position.x <= 0 || turnCards.children[i].position.y <= 0 ||
+                                turnCards.children[i].position.x >= cc.winSize.width ||
+                                turnCards.children[i].position.y >= cc.winSize.height) {
+                                turnCards.children[i].destroy();
+                                turnCards.children.splice(i, 0);
+                            }
+                        }
+
                         turnCards.removeAllChildren()
                     }, 1);
                 }

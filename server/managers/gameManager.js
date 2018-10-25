@@ -2,7 +2,7 @@ import global from "../global";
 import cardManager from './cardManager'
 
 const gameManager = {
-    startGame(io, room) {
+    startGame(room) {
         let newGame = {
             gameId: new Date().getTime(),
             roomNo: room.no,
@@ -42,11 +42,11 @@ const gameManager = {
 
         global.games.push(newGame);
 
-        io.in("room" + room.no).emit("notify", {
+        global.io.in("room" + room.no).emit("notify", {
             type: "updateTurn",
             data: newGame.currentTurn
         });
-        io.in("lobby").emit("notify", {type: "updateLobby"});
+        global.io.in("lobby").emit("notify", {type: "updateLobby"});
     },
     getGameByRoomNo(roomNo) {
         for (let room of global.rooms) {
@@ -119,6 +119,7 @@ const gameManager = {
         game.currentTurn.firstIndex = (game.currentTurn.firstIndex + bigPlayerIndex) % 4;
         game.currentTurn.turnPlayer = game.players[game.currentTurn.firstIndex].unionId;
         game.currentTurn.firstSuit = '';
+        game.currentTurn.turnTimeout = 20;
         global.io.in("room" + game.roomNo).emit("notify", {
             type: "updateTurn",
             data: game.currentTurn
