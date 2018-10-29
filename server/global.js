@@ -2,8 +2,21 @@ const global = {};
 
 const log4js = require("log4js");
 log4js.configure({
-    appenders: {log: {type: 'dateFile', filename: 'logs/', pattern: "yyyyMMdd.log", alwaysIncludePattern: true}},
-    categories: {default: {appenders: ['log'], level: 'info'}}
+    appenders: {
+        log:
+            {
+                type: 'dateFile',
+                filename: 'logs/',
+                pattern: "yyyyMMdd.log",
+                alwaysIncludePattern: true
+            }
+    },
+    categories: {
+        default: {
+            appenders: ['log'],
+            level: 'info'
+        }
+    }
 });
 
 global.logger = log4js.getLogger('log');

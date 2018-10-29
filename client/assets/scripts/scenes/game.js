@@ -24,8 +24,20 @@ cc.Class({
         localPointCards: []
     },
     onLoad() {
+        this.localPointCards = [[], [], [], []];
+        this.node.getChildByName("btnPlayCard").active = false;
+    },
+    start() {
+        if (!global.net.socket) {
+            cc.director.loadScene("login");
+            return;
+        }
+        this.playerInfos.forEach(function (e) {
+            e.active = false;
+        });
+
         let self = this;
-        self.localPointCards = [[], [], [], []];
+
         this.schedule(function () {
             let lastUpdate = null;
             let lastTurnInfo = null;
@@ -51,16 +63,6 @@ cc.Class({
                 this.updateTurn(self, lastTurnInfo);
             }
         }, 0.3);
-        self.node.getChildByName("btnPlayCard").active = false;
-    },
-    start() {
-        if (!global.net.socket) {
-            cc.director.loadScene("login");
-            return;
-        }
-        this.playerInfos.forEach(function (e) {
-            e.active = false;
-        });
 
         this.updateInfo();
     },
@@ -173,6 +175,17 @@ cc.Class({
         });
     },
     updateTurn(self, currentTurn) {
+        // 处理自动出牌
+        let myCards = self.node.getChildByName("myCards");
+        for (let card of currentTurn.playedCards) {
+            for (let i = myCards.children.length - 1; i >= 0; i--) {
+                let pokerCard = myCards.children[i].getComponent("pokerCard");
+                if (pokerCard.number == card.number && pokerCard.suit == card.suit) {
+                    myCards.children[i].destroy();
+                }
+            }
+        }
+
         // 设置倒计时
         for (let i = 0; i < self.playerInfos.length; i++) {
             let playerInfo = self.playerInfos[i].getComponent("playerInfo");
@@ -183,7 +196,6 @@ cc.Class({
         }
 
         let isMyTurn = currentTurn.turnPlayer === global.loginInfo.unionId;
-        let myCards = self.node.getChildByName("myCards");
 
         // 查询所有牌中有没有当前轮的花色
         let hasTurnSuit = false;

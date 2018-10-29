@@ -142,9 +142,11 @@ const cardManager = {
         return bigIndex;
     },
     getNumberScore(cardNumber) {
+        // 牌大小比较
         return cardNumber === 1 ? 14 : cardNumber;
     },
     getPointCards(turnCards){
+        // 牌点数
         let pointCards = [];
         for(let card of turnCards){
             if(card.ex !== ''){
@@ -152,6 +154,33 @@ const cardManager = {
             }
         }
         return pointCards;
+    },
+    getAutoPlayCard(turnCards, myCards){
+        // 自动出牌
+        // 梅花2
+        for(let card of myCards){
+            if (card.suit === "club" && card.number === 2) {
+                return card;
+            }
+        }
+
+        // 自动出当前花色
+        if(turnCards.length > 0)
+        {
+            let firstSuit = turnCards[0];
+            for(let card of myCards){
+                if (card.suit === firstSuit.suit) {
+                    return card;
+                }
+            }
+        }
+
+        // 自动出最后一张
+        if(myCards.length > 0){
+            return myCards[myCards.length - 1];
+        }
+
+        return null;
     }
 };
 

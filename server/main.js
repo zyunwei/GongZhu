@@ -10,10 +10,10 @@ global.logger.info("服务器已启动");
 // 服务端倒计时控制
 setInterval(function(){
     for(let game of global.games){
-        if(game.currentTurn.turnTimeout > 0  && game.currentTurn.turnCards.length > 0){
+        if(game.currentTurn.turnTimeout > 0){
             game.currentTurn.turnTimeout -= 1;
         } else{
-            // todo:  自动出牌
+            gameManager.autoPlayTurn(game);
         }
     }
 },1000);

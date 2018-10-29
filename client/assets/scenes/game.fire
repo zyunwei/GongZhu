@@ -41,8 +41,8 @@
     },
     "_scale": {
       "__type__": "cc.Vec3",
-      "x": 0.5140569133280316,
-      "y": 0.5140569133280316,
+      "x": 0.7111111111111111,
+      "y": 0.7111111111111111,
       "z": 1
     },
     "_quat": {
@@ -1392,6 +1392,7 @@
       "__id__": 30
     },
     "unionId": "",
+    "countdownNumber": -1,
     "_id": "3dru3dLllEMKlfHrlzv8nS"
   },
   {
@@ -2431,6 +2432,7 @@
       "__id__": 60
     },
     "unionId": "",
+    "countdownNumber": -1,
     "_id": "47fPwULUBMi5smTcNV2Htp"
   },
   {
@@ -3497,6 +3499,7 @@
       "__id__": 91
     },
     "unionId": "",
+    "countdownNumber": -1,
     "_id": "a5BCWjG7xJJbLvK7oohtFE"
   },
   {
@@ -4563,6 +4566,7 @@
       "__id__": 122
     },
     "unionId": "",
+    "countdownNumber": -1,
     "_id": "46TtOpHsdPPrWQ/HYvBe9O"
   },
   {
@@ -6026,6 +6030,7 @@
     "isInitCards": false,
     "myPosition": 0,
     "localTurnCards": [],
+    "localPointCards": [],
     "_id": "028QiMs4lO6bR9yuEqsDbX"
   }
 ]

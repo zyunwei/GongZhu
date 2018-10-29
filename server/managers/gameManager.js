@@ -37,7 +37,8 @@ const gameManager = {
             turnCards: [],
             turnTimeout: 20,
             firstSuit: '',
-            pointCards: [[], [], [], []]
+            pointCards: [[], [], [], []],
+            playedCards: []
         };
 
         global.games.push(newGame);
@@ -88,6 +89,7 @@ const gameManager = {
                 if (success === 1) {
                     game.turn++;
                     game.currentTurn.turnCards.push(turnCard);
+                    game.currentTurn.playedCards.push(turnCard);
                     if (game.currentTurn.firstSuit === '') {
                         game.currentTurn.firstSuit = turnCard.suit;
                     }
@@ -125,6 +127,18 @@ const gameManager = {
             type: "updateTurn",
             data: game.currentTurn
         });
+    },
+    autoPlayTurn(game) {
+        if (game.turnPlayer < 0) return;
+        let cardInfo = this.getCardInfo(game, game.currentTurn.turnPlayer);
+        let selectedCard = cardManager.getAutoPlayCard(game.currentTurn.turnCards, cardInfo);
+        if (selectedCard) {
+            this.playCard(game, game.currentTurn.turnPlayer, selectedCard);
+            global.io.in("room" + game.roomNo).emit("notify", {
+                type: "updateTurn",
+                data: game.currentTurn
+            });
+        }
     }
 };
 
