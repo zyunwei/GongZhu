@@ -22,10 +22,13 @@ cc.Class({
                 this.Status.string = "等待中";
                 break;
             case 1:
-                this.Status.string = "游戏中";
+                this.Status.string = "亮牌中";
                 break;
             case 2:
-                this.Status.string = "已结束";
+                this.Status.string = "游戏中";
+                break;
+            default:
+                this.Status.string = "结算中";
                 break;
         }
     },

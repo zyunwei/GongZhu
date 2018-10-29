@@ -17,8 +17,12 @@ cc.Class({
             default: null,
             type: cc.Prefab
         },
-        isGameStart: false,
+        noShowdownMark: {
+            default: null,
+            type: cc.Prefab
+        },
         isInitCards: false,
+        roomStatus: 0,
         myPosition: 0,
         localTurnCards: [],
         localPointCards: []
@@ -26,6 +30,8 @@ cc.Class({
     onLoad() {
         this.localPointCards = [[], [], [], []];
         this.node.getChildByName("btnPlayCard").active = false;
+        this.node.getChildByName("btnShowdown").active = false;
+        this.node.getChildByName("btnDoNotShowdown").active = false;
     },
     start() {
         if (!global.net.socket) {
@@ -41,12 +47,17 @@ cc.Class({
         this.schedule(function () {
             let lastUpdate = null;
             let lastTurnInfo = null;
+            let lastShowdownInfo = null;
             while (global.notifyQueue.length > 0) {
                 let notify = global.notifyQueue.shift();
                 if (notify) {
+
                     switch (notify.type) {
                         case "updateRoom":
                             lastUpdate = 1;
+                            break;
+                        case "updateShowdown":
+                            lastShowdownInfo = notify.data;
                             break;
                         case "updateTurn":
                             lastTurnInfo = notify.data;
@@ -55,16 +66,24 @@ cc.Class({
                 }
             }
             if (lastUpdate != null) {
-                this.updateInfo();
+                //console.log("updateRoom");
+                this.updateRoom();
             }
-            ;
+
+            if (lastShowdownInfo != null) {
+                //console.log("updateShowdown");
+                //console.log(lastShowdownInfo);
+                this.updateShowdown(self, lastShowdownInfo);
+            }
 
             if (lastTurnInfo != null) {
+                //console.log("updateTurn");
+                //console.log(lastTurnInfo);
                 this.updateTurn(self, lastTurnInfo);
             }
         }, 0.3);
 
-        this.updateInfo();
+        this.updateRoom();
     },
     exitRoomClick(event, data) {
         global.net.exitRoom(global.roomNo, function (result) {
@@ -82,17 +101,26 @@ cc.Class({
 
         return me;
     },
-    updateInfo: function () {
+    readyClick(event, data) {
+        let self = this;
+        global.net.setReady(function (result) {
+            if (result.success === "1") {
+                self.node.getChildByName("btnReady").active = false;
+            } else {
+                utils.messageBox("失败", result.message, function () {
+                    self.node.getChildByName("btnReady").active = true;
+                });
+            }
+        });
+    },
+    updateRoom: function () {
+        // 更新房间信息
         let self = this;
         global.net.getRoomInfo(global.roomNo, function (result) {
             if (result.success === "1") {
                 self.playerInfos.forEach(function (e) {
                     e.active = false;
                 });
-
-                if (result.data.status === 1 && !self.isInitCards) {
-                    self.initCards(self);
-                }
 
                 self.myPosition = self.getMyPosition(result.data.userList);
 
@@ -112,57 +140,130 @@ cc.Class({
                         playerInfo.setReadyStatus(result.data.status === 0 && e.status === 1);
 
                         if (showIndex === 0) {
-                            self.node.getChildByName("btnReady").active = e.status !== 1;
+                            self.node.getChildByName("btnReady").active = e.status === 0;
                         }
                     }
                 });
 
                 switch (result.data.status) {
-                    case 0:
-                        self.node.getChildByName("btnExit").active = true;
-                        break;
                     case 1:
                         self.node.getChildByName("btnExit").active = false;
                         break;
                     case 2:
+                        self.node.getChildByName("btnExit").active = false;
+                        break;
+                    default:
                         self.node.getChildByName("btnExit").active = true;
                         break;
+                }
+
+                self.roomStatus = result.data.status;
+
+                if (self.roomStatus !== 0) {
+                    self.initCard(self);
                 }
             } else {
                 utils.messageBox("错误", result.message);
             }
         });
     },
-    readyClick(event, data) {
-        let self = this;
-        global.net.setReady(function (result) {
-            if (result.success === "1") {
-                self.node.getChildByName("btnReady").active = false;
-            } else {
-                utils.messageBox("失败", result.message, function () {
-                    self.node.getChildByName("btnReady").active = true;
-                });
-            }
-        });
+    updateCard: function (self, cards) {
+        let myCards = self.node.getChildByName("myCards");
+
+        if (!self.isInitCards) {
+            myCards.removeAllChildren(true);
+            cards.forEach(function (e, i) {
+                let showCard = cc.instantiate(self.pokerDemo);
+                let pokerScript = showCard.getComponent("pokerCard");
+                pokerScript.init(e.suit, e.number);
+                showCard.parent = myCards;
+            });
+            self.isInitCards = true;
+        }
+
+        self.initShowdown(self);
+
+        if (self.roomStatus === self.initTurn(self)) {
+            self.initTurn(self);
+        }
     },
-    initCards(self) {
-        global.net.getCardInfo(global.roomNo, function (result) {
-            if (result.success === "1") {
-                let myCards = self.node.getChildByName("myCards");
-                myCards.removeAllChildren(true);
-                result.data.forEach(function (e, i) {
-                    let showCard = cc.instantiate(self.pokerDemo);
-                    let pokerScript = showCard.getComponent("pokerCard");
-                    pokerScript.init(e.suit, e.number);
-                    showCard.parent = myCards;
-                });
-                self.isGameStart = true;
-                self.isInitCards = true;
+    updateShowdown: function (self, showdownInfo) {
+        // 亮牌操作按钮相关
+        let myCards = self.node.getChildByName("myCards");
+        if (showdownInfo.unionId === global.loginInfo.unionId) {
+            if (showdownInfo.playerStatus === 1) {
+                self.node.getChildByName("btnShowdown").active = true;
+                self.node.getChildByName("btnDoNotShowdown").active = true;
+                self.node.getChildByName("btnPlayCard").active = false;
+                let hasShowdown = false;
+                for (let i = 0; i < myCards.children.length; i++) {
+                    let pokerCard = myCards.children[i].getComponent("pokerCard");
+                    pokerCard.setDisableMask(true);
+                    pokerCard.canTouch = false;
+                    if (pokerCard.suit === 'heart' && pokerCard.number === 1 ||
+                        pokerCard.suit === 'spade' && pokerCard.number === 12 ||
+                        pokerCard.suit === 'diamond' && pokerCard.number === 11 ||
+                        pokerCard.suit === 'club' && pokerCard.number === 10) {
+                        hasShowdown = true;
+                        pokerCard.canTouch = true;
+                        pokerCard.setDisableMask(false);
+                    }
+                }
+
+                if (!hasShowdown) {
+                    self.node.getChildByName("btnShowdown").active = false;
+                }
             } else {
-                utils.messageBox("失败", result.message);
+                self.node.getChildByName("btnShowdown").active = false;
+                self.node.getChildByName("btnDoNotShowdown").active = false;
+            }
+        }
+
+        // 亮牌显示
+        for (let i = 0; i < showdownInfo.showdownCards.length; i++) {
+            let showIndex = i - self.myPosition;
+            if (showIndex < 0) showIndex += 4;
+
+            let showdownBox = null;
+            switch (showIndex) {
+                case 0:
+                    showdownBox = self.node.getChildByName("showdownSouth");
+                    break;
+                case 1:
+                    showdownBox = self.node.getChildByName("showdownEast");
+                    break;
+                case 2:
+                    showdownBox = self.node.getChildByName("showdownNorth");
+                    break;
+                case 3:
+                    showdownBox = self.node.getChildByName("showdownWest");
+                    break;
             }
 
-            self.initTurn(self);
+            if (showdownBox != null) {
+                showdownBox.destroyAllChildren();
+                if(showdownInfo.showdownCards[i].length > 0){
+                    for (let j = 0; j < showdownInfo.showdownCards[i].length; j++) {
+                        let showCard = cc.instantiate(self.smallPokerDemo);
+                        let pokerScript = showCard.getComponent("pokerCard");
+                        pokerScript.init(showdownInfo.showdownCards[i][j].suit, showdownInfo.showdownCards[i][j].number);
+                        showCard.parent = showdownBox;
+                    }
+                }
+                else if (showdownInfo.playerStatus === 2){
+                    let noShowdownMark = cc.instantiate(self.noShowdownMark);
+                    noShowdownMark.parent = showdownBox;
+                }
+            }
+        }
+    },
+    initCard(self) {
+        global.net.getCardInfo(global.roomNo, function (result) {
+            if (result.success === "1") {
+                self.updateCard(self, result.data)
+            } else {
+                utils.messageBox("更新牌面信息失败", result.message);
+            }
         });
     },
     initTurn(self) {
@@ -170,17 +271,33 @@ cc.Class({
             if (result.success === "1") {
                 self.updateTurn(self, result.data)
             } else {
-                utils.messageBox("失败", result.message);
+                utils.messageBox("更新出牌信息失败", result.message);
             }
         });
     },
-    updateTurn(self, currentTurn) {
+    initShowdown(self) {
+        global.net.getShowdownInfo(global.roomNo, function (result) {
+            if (result.success === "1") {
+                self.updateShowdown(self, result.data)
+            } else {
+                utils.messageBox("更新亮牌信息失败", result.message);
+            }
+        });
+    },
+    updateTurn(self, data) {
+        let currentTurn = data.currentTurn;
+
+        // 更新出牌信息
+        if (!currentTurn) {
+            return;
+        }
+
         // 处理自动出牌
         let myCards = self.node.getChildByName("myCards");
-        for (let card of currentTurn.playedCards) {
+        for (let card of data.playedCards) {
             for (let i = myCards.children.length - 1; i >= 0; i--) {
                 let pokerCard = myCards.children[i].getComponent("pokerCard");
-                if (pokerCard.number == card.number && pokerCard.suit == card.suit) {
+                if (pokerCard.number === card.number && pokerCard.suit === card.suit) {
                     myCards.children[i].destroy();
                 }
             }
@@ -232,7 +349,7 @@ cc.Class({
                 currentTurn.turnCards[0].number !== self.localTurnCards[0].number) {
                 self.localTurnCards.splice(0, self.localTurnCards.length);
                 // 一轮结束，桌上的牌往下一轮出牌人的方向飞过去
-                // 将牌桌牌复制一份用于动画过度
+                // 将桌牌复制一份用于动画过度
                 let copyTurnCards = cc.instantiate(turnCards);
                 copyTurnCards.name = "copyTurnCards";
                 self.node.addChild(copyTurnCards);
@@ -310,7 +427,7 @@ cc.Class({
         }
 
         // 得牌显示
-        for (let i = 0; i < currentTurn.pointCards.length; i++) {
+        for (let i = 0; i < data.pointCards.length; i++) {
             let showIndex = i - self.myPosition;
             if (showIndex < 0) showIndex += 4;
 
@@ -331,10 +448,10 @@ cc.Class({
             }
 
             if (pointCardsBox != null) {
-                for (let j = 0; j < currentTurn.pointCards[i].length; j++) {
+                for (let j = 0; j < data.pointCards[i].length; j++) {
                     let localExist = false;
                     for (let card of self.localPointCards[i]) {
-                        if (card.suit === currentTurn.pointCards[i][j].suit && card.number === currentTurn.pointCards[i][j].number) {
+                        if (card.suit === data.pointCards[i][j].suit && card.number === data.pointCards[i][j].number) {
                             localExist = true;
                             break;
                         }
@@ -342,10 +459,10 @@ cc.Class({
                     if (localExist) {
                         continue;
                     }
-                    self.localPointCards[i].push(currentTurn.pointCards[i][j]);
+                    self.localPointCards[i].push(data.pointCards[i][j]);
                     let showCard = cc.instantiate(self.smallPokerDemo);
                     let pokerScript = showCard.getComponent("pokerCard");
-                    pokerScript.init(currentTurn.pointCards[i][j].suit, currentTurn.pointCards[i][j].number);
+                    pokerScript.init(data.pointCards[i][j].suit, data.pointCards[i][j].number);
                     showCard.parent = pointCardsBox;
                 }
             }
@@ -385,4 +502,50 @@ cc.Class({
             }
         });
     },
+    showdownClick(event, data) {
+        let self = this;
+        let myCards = self.node.getChildByName("myCards");
+        let selectedCard = [];
+        for (let i = 0; i < myCards.children.length; i++) {
+            let pokerCard = myCards.children[i].getComponent("pokerCard");
+
+            if (pokerCard.isTouched) {
+                selectedCard.push({suit: pokerCard.suit, number: pokerCard.number});
+            }
+        }
+
+        if (selectedCard.length <= 0) {
+            utils.messageBox("提示", "请选择要亮的牌");
+            return;
+        }
+
+        global.net.showdown(selectedCard, function (result) {
+            if (result.success === "1") {
+                for (let i = myCards.children.length - 1; i >= 0; i--) {
+                    let pokerCard = myCards.children[i].getComponent("pokerCard");
+                    pokerCard.setDefault();
+                }
+                self.node.getChildByName("btnShowdown").active = false;
+                self.node.getChildByName("btnDoNotShowdown").active = false;
+            } else {
+                utils.messageBox("失败", result.message);
+            }
+        });
+    },
+    notShowdownClick(event, data) {
+        let self = this;
+        let myCards = self.node.getChildByName("myCards");
+        global.net.showdown([], function (result) {
+            if (result.success === "1") {
+                for (let i = myCards.children.length - 1; i >= 0; i--) {
+                    let pokerCard = myCards.children[i].getComponent("pokerCard");
+                    pokerCard.setDefault();
+                }
+                self.node.getChildByName("btnShowdown").active = false;
+                self.node.getChildByName("btnDoNotShowdown").active = false;
+            } else {
+                utils.messageBox("失败", result.message);
+            }
+        });
+    }
 });

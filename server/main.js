@@ -8,15 +8,19 @@ global.io = io;
 global.logger.info("服务器已启动");
 
 // 服务端倒计时控制
-setInterval(function(){
-    for(let game of global.games){
-        if(game.currentTurn.turnTimeout > 0){
+setInterval(function () {
+    for (let game of global.games) {
+        let room = gameManager.getRoomByRoomNo(game.roomNo);
+        if (room.status !== 2) {
+            continue;
+        }
+        if (game.currentTurn.turnTimeout > 0) {
             game.currentTurn.turnTimeout -= 1;
-        } else{
+        } else {
             gameManager.autoPlayTurn(game);
         }
     }
-},1000);
+}, 1000);
 
 global.io.on('connection', function (socket) {
     socket.on('disconnect', function () {
@@ -223,7 +227,6 @@ global.io.on('connection', function (socket) {
                     if (global.rooms[i].players[j].unionId === onlineUser.unionId) {
                         global.rooms[i].players[j].status = 1;
 
-                        // 全部准备即开始游戏
                         let readyCount = 0;
                         for (let k = 0; k < global.rooms[i].players.length; k++) {
                             if (global.rooms[i].players[k].status === 1) {
@@ -231,8 +234,9 @@ global.io.on('connection', function (socket) {
                             }
                         }
 
+                        // 全部准备 开始亮牌
                         if (readyCount >= 4) {
-                            gameManager.startGame(global.rooms[i]);
+                            gameManager.startShowdown(global.rooms[i])
                         }
 
                         global.io.in("room" + global.rooms[i].no).emit("notify", {type: "updateRoom"});
@@ -254,14 +258,42 @@ global.io.on('connection', function (socket) {
             return;
         }
 
+        let cards = [];
         let game = gameManager.getGameByRoomNo(roomNo);
-        if (!game) {
-            response({success: "0", message: "游戏信息异常，请稍后再试"});
+        if (game) {
+            cards = gameManager.getCardByUnionId(game, onlineUser.unionId);
+        }
+
+        response({success: "1", message: "", data: cards});
+    });
+
+    socket.on('getShowdownInfo', function (roomNo, response) {
+        let onlineUser = userManager.getCurrentUser(socket.id);
+        if (!onlineUser) {
+            response({success: "0", message: "账号异常，请稍后再试"});
             return;
         }
 
-        let cards = gameManager.getCardInfo(game, onlineUser.unionId);
-        response({success: "1", message: "", data: cards});
+        let playerStatus = 0;
+        let room = gameManager.getRoomByRoomNo(roomNo);
+        if (!room) {
+            response({success: "0", message: "房间信息异常，请稍后再试"});
+            return;
+        }
+
+        for (let player of room.players) {
+            if (player.unionId === onlineUser.unionId) {
+                playerStatus = player.status;
+            }
+        }
+
+        let showdownCards = [];
+        let game = gameManager.getGameByRoomNo(roomNo);
+        if (game) {
+            showdownCards = game.showdownCards;
+        }
+
+        response({success: "1", message: "", data: {showdownCards, playerStatus, unionId: onlineUser.unionId}});
     });
 
     socket.on('getTurnInfo', function (roomNo, response) {
@@ -277,7 +309,7 @@ global.io.on('connection', function (socket) {
             return;
         }
 
-        response({success: "1", message: "", data: game.currentTurn});
+        response({success: "1", message: "", data: gameManager.getClientTurnInfo(game)});
     });
 
     socket.on('playCard', function (selectedCard, response) {
@@ -288,7 +320,7 @@ global.io.on('connection', function (socket) {
         }
 
         let room = userManager.getRoomByUnionId(onlineUser.unionId);
-        if(!room){
+        if (!room) {
             response({success: "0", message: "房间信息异常，请稍后再试"});
             return;
         }
@@ -299,16 +331,43 @@ global.io.on('connection', function (socket) {
             return;
         }
 
-        if(!gameManager.playCard(game, onlineUser.unionId, selectedCard)){
+        if (!gameManager.playCard(game, onlineUser.unionId, selectedCard)) {
             response({success: "0", message: "游戏数据异常，请稍后再试"});
             return;
         }
 
         global.io.in("room" + room.no).emit("notify", {
             type: "updateTurn",
-            data: game.currentTurn
+            data: gameManager.getClientTurnInfo(game)
         });
 
-        response({success: "1", message: "", data: game.currentTurn});
+        response({success: "1", message: "", data: {}});
+    });
+
+    socket.on('showdown', function (selectedCard, response) {
+        let onlineUser = userManager.getCurrentUser(socket.id);
+        if (!onlineUser) {
+            response({success: "0", message: "账号异常，请稍后再试"});
+            return;
+        }
+
+        let room = userManager.getRoomByUnionId(onlineUser.unionId);
+        if (!room || room.status !== 1) {
+            response({success: "0", message: "房间信息异常，请稍后再试"});
+            return;
+        }
+
+        let game = gameManager.getGameByRoomNo(room.no);
+        if (!game) {
+            response({success: "0", message: "游戏信息异常，请稍后再试"});
+            return;
+        }
+
+        if (!gameManager.showdown(game, onlineUser.unionId, selectedCard)) {
+            response({success: "0", message: "游戏数据异常，请稍后再试"});
+            return;
+        }
+
+        response({success: "1", message: "", data: {}});
     });
 });

@@ -14,7 +14,7 @@ cc.Class({
         number: 0,
         canTouch: false,
         isTouched: false,
-        disabled : false
+        disabled: false
     },
     onLoad() {
         this.handleControl();
@@ -34,20 +34,24 @@ cc.Class({
         numberImg += suit === 'heart' || suit === 'diamond' ? 'r' : 'b';
         numberImg += number;
         cc.loader.loadRes(suitImg, cc.SpriteFrame, function (err, sprite) {
-            let spr = self.pokerSuit.getComponent(cc.Sprite);
-            if(spr) spr.spriteFrame = sprite;
+            if (self.pokerSuit) {
+                let spr = self.pokerSuit.getComponent(cc.Sprite);
+                if (spr) spr.spriteFrame = sprite;
+            }
         });
 
         cc.loader.loadRes(numberImg, cc.SpriteFrame, function (err, sprite) {
-            let spr = self.pokerNumber.getComponent(cc.Sprite);
-            if(spr) spr.spriteFrame = sprite;
+            if (self.pokerNumber) {
+                let spr = self.pokerNumber.getComponent(cc.Sprite);
+                if (spr) spr.spriteFrame = sprite;
+            }
         });
 
         this.setDisableMask(false);
     },
-    setDisableMask(isDisabled){
+    setDisableMask(isDisabled) {
         let mask = this.node.getChildByName("disableMask");
-        if(mask){
+        if (mask) {
             this.node.getChildByName("disableMask").active = isDisabled;
         }
     },
@@ -66,5 +70,13 @@ cc.Class({
         } else {
             this.node.runAction(cc.moveBy(0.2, 0, 30));
         }
+    },
+    setDefault() {
+        if (this.isTouched) {
+            this.node.runAction(cc.moveBy(0.2, 0, -30));
+            this.isTouched = false;
+        }
+        this.canTouch = false;
+        this.setDisableMask(false);
     }
 });

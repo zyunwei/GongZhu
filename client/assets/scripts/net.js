@@ -111,8 +111,20 @@ const net = function () {
         });
     }
 
+    that.getShowdownInfo = function(roomNo, callback){
+        that.socket.emit('getShowdownInfo', roomNo, function (data) {
+            callback(data);
+        });
+    }
+
     that.playCard = function(selectedCard, callback){
         that.socket.emit('playCard', selectedCard, function (data) {
+            callback(data);
+        });
+    }
+
+    that.showdown  = function(selectedCard, callback){
+        that.socket.emit('showdown', selectedCard, function (data) {
             callback(data);
         });
     }

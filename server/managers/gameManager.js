@@ -2,14 +2,24 @@ import global from "../global";
 import cardManager from './cardManager'
 
 const gameManager = {
-    startGame(room) {
+    getClientTurnInfo(game) {
+        return {
+            currentTurn: game.currentTurn,
+            pointCards: game.pointCards,
+            playedCards: game.playedCards
+        }
+    },
+    startShowdown(room) {
         let newGame = {
             gameId: new Date().getTime(),
             roomNo: room.no,
             players: [],
             turn: 0,
-            firstDealerIndex: 0
-        };
+            firstDealerIndex: 0,
+            showdownCards: [[], [], [], []],
+            pointCards: [[], [], [], []],
+            playedCards: [],
+        }
 
         let cards = cardManager.getAllCard();
         cards = cardManager.shuffle(cards);
@@ -31,28 +41,35 @@ const gameManager = {
         room.gameId = newGame.gameId;
         room.status = 1;
 
-        newGame.currentTurn = {
-            firstIndex: newGame.firstDealerIndex,
-            turnPlayer: newGame.players[newGame.firstDealerIndex].unionId,
-            turnCards: [],
-            turnTimeout: 20,
-            firstSuit: '',
-            pointCards: [[], [], [], []],
-            playedCards: []
-        };
-
         global.games.push(newGame);
+
+        global.io.in("room" + room.no).emit("notify", {type: "updateRoom"});
+        global.io.in("lobby").emit("notify", {type: "updateLobby"});
+    },
+    startGame(room) {
+        room.status = 2;
+
+        let game = this.getGameByRoomNo(room.no);
+
+        game.currentTurn = {
+            firstIndex: game.firstDealerIndex,
+            turnPlayer: game.players[game.firstDealerIndex].unionId,
+            turnCards: [],
+            turnTimeout: 15,
+            firstSuit: ''
+        };
 
         global.io.in("room" + room.no).emit("notify", {
             type: "updateTurn",
-            data: newGame.currentTurn
+            data: this.getClientTurnInfo(game)
         });
+
         global.io.in("lobby").emit("notify", {type: "updateLobby"});
     },
-    getGameByRoomNo(roomNo) {
+    getRoomByRoomNo(roomNo) {
         for (let room of global.rooms) {
             if (room.no === roomNo) {
-                return this.getGameByGameId(room.gameId);
+                return room;
             }
         }
         return null;
@@ -65,7 +82,14 @@ const gameManager = {
         }
         return null;
     },
-    getCardInfo(game, unionId) {
+    getGameByRoomNo(roomNo) {
+        let room = this.getRoomByRoomNo(roomNo);
+        if (room != null) {
+            return this.getGameByGameId(room.gameId);
+        }
+        return null;
+    },
+    getCardByUnionId(game, unionId) {
         for (let player of game.players) {
             if (player.unionId === unionId) {
                 return player.cards;
@@ -73,6 +97,52 @@ const gameManager = {
         }
         return [];
     },
+    // 亮牌
+    showdown(game, unionId, selectedCard) {
+        let room = this.getRoomByRoomNo(game.roomNo);
+        if (!room) {
+            return false;
+        }
+
+        let playerStatus = 0;
+        for (let i = 0; i < game.players.length; i++) {
+            if (game.players[i].unionId === unionId) {
+                if (room.players[i].status !== 1) {
+                    return false;
+                }
+
+                for (let card of selectedCard) {
+                    game.showdownCards[i].push(card);
+                }
+
+                room.players[i].status = 2;
+                playerStatus = room.players[i].status;
+                break;
+            }
+        }
+
+        let showdownFinishCount = 0;
+
+        for (let player of room.players) {
+            if (player.status === 2) {
+                showdownFinishCount += 1;
+            }
+        }
+
+        let data = {
+            playerStatus: playerStatus,
+            showdownCards: game.showdownCards
+        };
+
+        global.io.in("room" + game.roomNo).emit("notify", {type: "updateShowdown", data});
+
+        if (showdownFinishCount >= 4) {
+            this.startGame(this.getRoomByRoomNo(game.roomNo));
+        }
+
+        return true;
+    },
+    // 出牌
     playCard(game, unionId, selectedCard) {
         let success = 0;
         for (let i = 0; i < game.players.length; i++) {
@@ -89,7 +159,7 @@ const gameManager = {
                 if (success === 1) {
                     game.turn++;
                     game.currentTurn.turnCards.push(turnCard);
-                    game.currentTurn.playedCards.push(turnCard);
+                    game.playedCards.push(turnCard);
                     if (game.currentTurn.firstSuit === '') {
                         game.currentTurn.firstSuit = turnCard.suit;
                     }
@@ -99,12 +169,12 @@ const gameManager = {
                         let self = this;
                         setTimeout(function () {
                             self.startNewTurn(game, bigPlayerIndex);
-                        }, 2000);
+                        }, 1500);
                         game.currentTurn.turnPlayer = -1;
                     } else {
                         game.currentTurn.turnPlayer = game.players[(game.currentTurn.firstIndex + game.currentTurn.turnCards.length) % 4].unionId;
                     }
-                    game.currentTurn.turnTimeout = 20;
+                    game.currentTurn.turnTimeout = 15;
                     break;
                 }
             }
@@ -115,28 +185,28 @@ const gameManager = {
     startNewTurn(game, bigPlayerIndex) {
         let pointCards = cardManager.getPointCards(game.currentTurn.turnCards);
         for (let card of pointCards) {
-            game.currentTurn.pointCards[(game.currentTurn.firstIndex + bigPlayerIndex) % 4].push(card);
+            game.pointCards[(game.currentTurn.firstIndex + bigPlayerIndex) % 4].push(card);
         }
 
         game.currentTurn.turnCards.splice(0, game.currentTurn.turnCards.length);
         game.currentTurn.firstIndex = (game.currentTurn.firstIndex + bigPlayerIndex) % 4;
         game.currentTurn.turnPlayer = game.players[game.currentTurn.firstIndex].unionId;
         game.currentTurn.firstSuit = '';
-        game.currentTurn.turnTimeout = 20;
+        game.currentTurn.turnTimeout = 15;
         global.io.in("room" + game.roomNo).emit("notify", {
             type: "updateTurn",
-            data: game.currentTurn
+            data: this.getClientTurnInfo(game)
         });
     },
     autoPlayTurn(game) {
         if (game.turnPlayer < 0) return;
-        let cardInfo = this.getCardInfo(game, game.currentTurn.turnPlayer);
+        let cardInfo = this.getCardByUnionId(game, game.currentTurn.turnPlayer);
         let selectedCard = cardManager.getAutoPlayCard(game.currentTurn.turnCards, cardInfo);
         if (selectedCard) {
             this.playCard(game, game.currentTurn.turnPlayer, selectedCard);
             global.io.in("room" + game.roomNo).emit("notify", {
                 type: "updateTurn",
-                data: game.currentTurn
+                data: this.getClientTurnInfo(game)
             });
         }
     }
