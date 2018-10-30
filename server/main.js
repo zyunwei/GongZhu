@@ -277,7 +277,7 @@ global.io.on('connection', function (socket) {
 
         let game = gameManager.getGameByRoomNo(roomNo);
         if (game) {
-            response({success: "1", message: "", data: gameManager.getShowdownInfo(game)});
+            response({success: "1", message: "", data: cardManager.getShowdownInfo(game)});
         } else {
             response({success: "0", message: "游戏信息异常，请稍后再试", data});
         }

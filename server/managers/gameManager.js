@@ -9,17 +9,6 @@ const gameManager = {
             playedCards: game.playedCards
         }
     },
-    getShowdownInfo(game) {
-        let showdowns = [];
-        for (let i = 0; i < game.players.length; i++) {
-            showdowns.push({
-                unionId: game.players[i].unionId,
-                isShowdown: game.players[i].isShowdown,
-                showdownCards: game.showdownCards[i]
-            });
-        }
-        return showdowns;
-    },
     startShowdown(room) {
         let newGame = {
             gameId: new Date().getTime(),
@@ -127,7 +116,11 @@ const gameManager = {
             }
         }
 
-        let showdowns = this.getShowdownInfo(game);
+        let showdowns = cardManager.getShowdownInfo(game);
+
+        if (showdownFinishCount >= 4) {
+            cardManager.checkShowdown(game);
+        }
 
         global.io.in("room" + game.roomNo).emit("notify", {type: "updateShowdown", data: showdowns});
 
@@ -194,7 +187,7 @@ const gameManager = {
         }
         else {
             game.currentTurn.turnPlayer = null;
-            console.log("game over");
+            this.gameOver(game);
         }
 
         global.io.in("room" + game.roomNo).emit("notify", {
@@ -212,6 +205,10 @@ const gameManager = {
                 data: this.getClientTurnInfo(game)
             });
         }
+    },
+    gameOver(game) {
+        let gameScore = cardManager.getFinalScore(game);
+        console.log(gameScore);
     }
 };
 

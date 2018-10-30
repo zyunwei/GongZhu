@@ -1,4 +1,17 @@
+import global from "../global";
+
 const cardManager = {
+    getShowdownInfo(game) {
+        let showdowns = [];
+        for (let i = 0; i < game.players.length; i++) {
+            showdowns.push({
+                unionId: game.players[i].unionId,
+                isShowdown: game.players[i].isShowdown,
+                showdownCards: game.showdownCards[i]
+            });
+        }
+        return showdowns;
+    },
     getAllCard() {
         // 获得所有牌
         let cards = [];
@@ -17,11 +30,11 @@ const cardManager = {
                 else if (suit === 'club' && i === 10) {
                     cardInfo.point = 50;
                     cardInfo.ex = 'double';
-                } else if (suit == 'heart') {
+                } else if (suit === 'heart') {
                     cardInfo.ex = 'point';
                     switch (i) {
                         case 1:
-                            cardInfo.point = 50;
+                            cardInfo.point = -50;
                             break;
                         case 2:
                         case 3:
@@ -34,16 +47,16 @@ const cardManager = {
                         case 8:
                         case 9:
                         case 10:
-                            cardInfo.point = 10;
+                            cardInfo.point = -10;
                             break;
                         case 11:
-                            cardInfo.point = 20;
+                            cardInfo.point = -20;
                             break;
                         case 12:
-                            cardInfo.point = 30;
+                            cardInfo.point = -30;
                             break;
                         case 13:
-                            cardInfo.point = 40;
+                            cardInfo.point = -40;
                             break;
                     }
                 }
@@ -338,6 +351,170 @@ const cardManager = {
                 count++;
         }
         return count >= 16;
+    },
+    checkShowdown(game) {
+        // 检查亮牌数，亮3张时必须全亮四张
+        let showdownCards = [];
+        for (let showdown of game.showdownCards) {
+            for (let card of showdown) {
+                showdownCards.push(card);
+            }
+        }
+
+        if (showdownCards.length === 3) {
+            for (let i = 0; i < game.players.length; i++) {
+                for (let card of game.players[i].cards) {
+                    if (card.ex === 'point' && card.number === 1 ||
+                        card.ex === 'pig' || card.ex === 'sheep' || card.ex === 'double') {
+                        let needShowdown = true;
+                        for (let showdown of showdownCards) {
+                            if (showdown.suit === card.suit && showdown.number === card.number) {
+                                needShowdown = false;
+                            }
+                        }
+
+                        if (needShowdown) {
+                            game.showdownCards[i].push({
+                                suit: card.suit,
+                                number: card.number
+                            });
+                            global.io.in("room" + game.roomNo).emit("notify", {
+                                type: "updateShowdown",
+                                data: this.getShowdownInfo(game)
+                            });
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    },
+    getFinalScore(game) {
+        let gameScore = [0, 0, 0, 0];
+
+        let isShowdownHeart = false; // 卖红桃
+        let isShowdownPig = false; // 卖猪
+        let isShowdownSheep = false; // 卖羊
+        let isShowdownDouble = false; // 卖变压器
+
+        for (let showdown of game.showdownCards) {
+            for (let card of showdown) {
+                if (card.suit === 'heart' && card.number === 1) {
+                    isShowdownHeart = true;
+                }
+                else if (card.suit === 'spade' && card.number === 12) {
+                    isShowdownPig = true;
+                }
+                else if (card.suit === 'diamond' && card.number === 11) {
+                    isShowdownSheep = true;
+                }
+                else if (card.suit === 'club' && card.number === 10) {
+                    isShowdownDouble = true;
+                }
+            }
+        }
+
+        // 判断有没有全收
+        let isAllInHeart = true;
+        let checkHeartIndex = -1;
+        let isAllIn = true;
+        let checkAllIndex = -1;
+        for (let i = 0; i < 4; i++) {
+            for (let j = 0; j < game.pointCards[i].length; j++) {
+                if (game.pointCards[i][j].ex === 'point') {
+                    if (checkHeartIndex >= 0 && checkHeartIndex !== i) {
+                        isAllInHeart = false;
+                    }
+                    checkHeartIndex = i;
+                }
+
+                if (checkAllIndex >= 0 && checkAllIndex !== i) {
+                    isAllIn = false;
+                    break;
+                }
+                checkAllIndex = i;
+            }
+        }
+
+        // 先计算红桃、猪、羊
+        for (let i = 0; i < 4; i++) {
+            for (let j = 0; j < game.pointCards[i].length; j++) {
+                if (game.pointCards[i][j].ex === 'point') {
+                    if (isAllInHeart) {
+                        // 全收红桃
+                        if (isShowdownHeart) {
+                            gameScore[i] += Math.abs(game.pointCards[i][j].point) * 2;
+                        }
+                        else {
+                            gameScore[i] += Math.abs(game.pointCards[i][j].point);
+                        }
+                    }
+                    else {
+                        // 没有全收
+                        if (isShowdownHeart) {
+                            gameScore[i] += game.pointCards[i][j].point * 2;
+                        }
+                        else {
+                            gameScore[i] += game.pointCards[i][j].point;
+                        }
+                    }
+                } else if (game.pointCards[i][j].ex === 'pig') {
+                    // 全收
+                    if (isAllIn) {
+                        if (isShowdownPig) {
+                            gameScore[i] += Math.abs(game.pointCards[i][j].point) * 2;
+                        }
+                        else {
+                            gameScore[i] += Math.abs(game.pointCards[i][j].point);
+                        }
+                    }
+                    else {
+                        if (isShowdownPig) {
+                            gameScore[i] += game.pointCards[i][j].point * 2;
+                        }
+                        else {
+                            gameScore[i] += game.pointCards[i][j].point;
+                        }
+                    }
+                } else if (game.pointCards[i][j].ex === 'sheep') {
+                    if (isShowdownSheep) {
+                        gameScore[i] += game.pointCards[i][j].point * 2;
+                    }
+                    else {
+                        gameScore[i] += game.pointCards[i][j].point;
+                    }
+                }
+            }
+        }
+
+        // 计算变压器
+        for (let i = 0; i < 4; i++) {
+            for (let j = 0; j < game.pointCards[i].length; j++) {
+                if (game.pointCards[i][j].ex === 'double') {
+                    if (gameScore[i] === 0) {
+                        // 只得变压器
+                        if (isShowdownDouble) {
+                            gameScore[i] += game.pointCards[i][j].point * 2;
+                        }
+                        else {
+                            gameScore[i] += game.pointCards[i][j].point;
+                        }
+                    } else {
+                        // 有其他分
+                        if (isShowdownDouble) {
+                            gameScore[i] = gameScore[i] * 4;
+                        }
+                        else {
+                            gameScore[i] = gameScore[i] * 2;
+                        }
+                    }
+
+                    break;
+                }
+            }
+        }
+
+        return gameScore;
     }
 };
 
