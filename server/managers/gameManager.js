@@ -166,7 +166,7 @@ const gameManager = {
                         setTimeout(function () {
                             self.startNewTurn(game, bigPlayerIndex);
                         }, 1500);
-                        game.currentTurn.turnPlayer = -1;
+                        game.currentTurn.turnPlayer = null;
                     } else {
                         game.currentTurn.turnPlayer = game.players[(game.currentTurn.firstIndex + game.currentTurn.turnCards.length) % 4].unionId;
                     }
@@ -186,9 +186,17 @@ const gameManager = {
 
         game.currentTurn.turnCards.splice(0, game.currentTurn.turnCards.length);
         game.currentTurn.firstIndex = (game.currentTurn.firstIndex + bigPlayerIndex) % 4;
-        game.currentTurn.turnPlayer = game.players[game.currentTurn.firstIndex].unionId;
         game.currentTurn.firstSuit = '';
         game.currentTurn.turnTimeout = 15;
+
+        if (!cardManager.checkGameOver(game)) {
+            game.currentTurn.turnPlayer = game.players[game.currentTurn.firstIndex].unionId;
+        }
+        else {
+            game.currentTurn.turnPlayer = null;
+            console.log("game over");
+        }
+
         global.io.in("room" + game.roomNo).emit("notify", {
             type: "updateTurn",
             data: this.getClientTurnInfo(game)

@@ -104,7 +104,7 @@ const cardManager = {
         for (let r = 0; r < cards.length; r++) {
             for (let i = 0; i < cards[r].length - 1; i++) {
                 for (let j = 0; j < cards[r].length - 1 - i; j++) {
-                    if (cards[r][j].score > cards[r][j + 1].score) {
+                    if (cards[r][j].score < cards[r][j + 1].score) {
                         tmpCard = cards[r][j];
                         cards[r][j] = cards[r][j + 1];
                         cards[r][j + 1] = tmpCard;
@@ -329,6 +329,15 @@ const cardManager = {
 
 
         return {success: "1", message: ""};
+    },
+    checkGameOver(game) {
+        // 检查含分牌是否已打完
+        let count = 0;
+        for (let card of game.playedCards) {
+            if (card.ex !== '')
+                count++;
+        }
+        return count >= 16;
     }
 };
 
