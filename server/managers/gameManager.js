@@ -9,6 +9,17 @@ const gameManager = {
             playedCards: game.playedCards
         }
     },
+    getShowdownInfo(game) {
+        let showdowns = [];
+        for (let i = 0; i < game.players.length; i++) {
+            showdowns.push({
+                unionId: game.players[i].unionId,
+                isShowdown: game.players[i].isShowdown,
+                showdownCards: game.showdownCards[i]
+            });
+        }
+        return showdowns;
+    },
     startShowdown(room) {
         let newGame = {
             gameId: new Date().getTime(),
@@ -29,7 +40,8 @@ const gameManager = {
         room.players.forEach(function (e, i) {
             newGame.players.push({
                 unionId: e.unionId,
-                cards: cards[i]
+                cards: cards[i],
+                isShowdown: 0
             });
             cards[i].some(function (ee, ii) {
                 if (ee.suit === "club" && ee.number === 2) {
@@ -99,42 +111,24 @@ const gameManager = {
     },
     // 亮牌
     showdown(game, unionId, selectedCard) {
-        let room = this.getRoomByRoomNo(game.roomNo);
-        if (!room) {
-            return false;
-        }
-
-        let playerStatus = 0;
+        let showdownFinishCount = 0;
         for (let i = 0; i < game.players.length; i++) {
             if (game.players[i].unionId === unionId) {
-                if (room.players[i].status !== 1) {
-                    return false;
-                }
-
                 for (let card of selectedCard) {
                     game.showdownCards[i].push(card);
                 }
 
-                room.players[i].status = 2;
-                playerStatus = room.players[i].status;
-                break;
+                game.players[i].isShowdown = 1;
             }
-        }
 
-        let showdownFinishCount = 0;
-
-        for (let player of room.players) {
-            if (player.status === 2) {
+            if (game.players[i].isShowdown === 1) {
                 showdownFinishCount += 1;
             }
         }
 
-        let data = {
-            playerStatus: playerStatus,
-            showdownCards: game.showdownCards
-        };
+        let showdowns = this.getShowdownInfo(game);
 
-        global.io.in("room" + game.roomNo).emit("notify", {type: "updateShowdown", data});
+        global.io.in("room" + game.roomNo).emit("notify", {type: "updateShowdown", data: showdowns});
 
         if (showdownFinishCount >= 4) {
             this.startGame(this.getRoomByRoomNo(game.roomNo));

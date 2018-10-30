@@ -183,44 +183,47 @@ cc.Class({
 
         self.initShowdown(self);
 
-        if (self.roomStatus === self.initTurn(self)) {
+        if (self.roomStatus === 2) {
             self.initTurn(self);
         }
     },
-    updateShowdown: function (self, showdownInfo) {
+    updateShowdown: function (self, showdowns) {
         // 亮牌操作按钮相关
         let myCards = self.node.getChildByName("myCards");
-        if (showdownInfo.unionId === global.loginInfo.unionId) {
-            if (showdownInfo.playerStatus === 1) {
-                self.node.getChildByName("btnShowdown").active = true;
-                self.node.getChildByName("btnDoNotShowdown").active = true;
-                self.node.getChildByName("btnPlayCard").active = false;
-                let hasShowdown = false;
-                for (let i = 0; i < myCards.children.length; i++) {
-                    let pokerCard = myCards.children[i].getComponent("pokerCard");
-                    pokerCard.setDisableMask(true);
-                    pokerCard.canTouch = false;
-                    if (pokerCard.suit === 'heart' && pokerCard.number === 1 ||
-                        pokerCard.suit === 'spade' && pokerCard.number === 12 ||
-                        pokerCard.suit === 'diamond' && pokerCard.number === 11 ||
-                        pokerCard.suit === 'club' && pokerCard.number === 10) {
-                        hasShowdown = true;
-                        pokerCard.canTouch = true;
-                        pokerCard.setDisableMask(false);
+        for(let showdown of showdowns){
+            if(showdown.unionId === global.loginInfo.unionId){
+                if (showdown.isShowdown !== 1) {
+                    self.node.getChildByName("btnShowdown").active = true;
+                    self.node.getChildByName("btnDoNotShowdown").active = true;
+                    self.node.getChildByName("btnPlayCard").active = false;
+                    let hasShowdown = false;
+                    for (let i = 0; i < myCards.children.length; i++) {
+                        let pokerCard = myCards.children[i].getComponent("pokerCard");
+                        pokerCard.setDisableMask(true);
+                        pokerCard.canTouch = false;
+                        if (pokerCard.suit === 'heart' && pokerCard.number === 1 ||
+                            pokerCard.suit === 'spade' && pokerCard.number === 12 ||
+                            pokerCard.suit === 'diamond' && pokerCard.number === 11 ||
+                            pokerCard.suit === 'club' && pokerCard.number === 10) {
+                            hasShowdown = true;
+                            pokerCard.canTouch = true;
+                            pokerCard.setDisableMask(false);
+                        }
                     }
-                }
 
-                if (!hasShowdown) {
+                    if (!hasShowdown) {
+                        self.node.getChildByName("btnShowdown").active = false;
+                    }
+                } else {
                     self.node.getChildByName("btnShowdown").active = false;
+                    self.node.getChildByName("btnDoNotShowdown").active = false;
                 }
-            } else {
-                self.node.getChildByName("btnShowdown").active = false;
-                self.node.getChildByName("btnDoNotShowdown").active = false;
+                break;
             }
         }
 
         // 亮牌显示
-        for (let i = 0; i < showdownInfo.showdownCards.length; i++) {
+        for (let i = 0; i < showdowns.length; i++) {
             let showIndex = i - self.myPosition;
             if (showIndex < 0) showIndex += 4;
 
@@ -242,15 +245,15 @@ cc.Class({
 
             if (showdownBox != null) {
                 showdownBox.destroyAllChildren();
-                if(showdownInfo.showdownCards[i].length > 0){
-                    for (let j = 0; j < showdownInfo.showdownCards[i].length; j++) {
+                if(showdowns[i].showdownCards.length > 0){
+                    for (let j = 0; j < showdowns[i].showdownCards.length; j++) {
                         let showCard = cc.instantiate(self.smallPokerDemo);
                         let pokerScript = showCard.getComponent("pokerCard");
-                        pokerScript.init(showdownInfo.showdownCards[i][j].suit, showdownInfo.showdownCards[i][j].number);
+                        pokerScript.init(showdowns[i].showdownCards[j].suit, showdowns[i].showdownCards[j].number);
                         showCard.parent = showdownBox;
                     }
                 }
-                else if (showdownInfo.playerStatus === 2){
+                else if (showdowns[i].isShowdown === 1){
                     let noShowdownMark = cc.instantiate(self.noShowdownMark);
                     noShowdownMark.parent = showdownBox;
                 }
@@ -300,6 +303,7 @@ cc.Class({
                 if (pokerCard.number === card.number && pokerCard.suit === card.suit) {
                     myCards.children[i].destroy();
                 }
+                pokerCard.setDefault();
             }
         }
 

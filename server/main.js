@@ -236,7 +236,7 @@ global.io.on('connection', function (socket) {
 
                         // 全部准备 开始亮牌
                         if (readyCount >= 4) {
-                            gameManager.startShowdown(global.rooms[i])
+                            gameManager.startShowdown(global.rooms[i]);
                         }
 
                         global.io.in("room" + global.rooms[i].no).emit("notify", {type: "updateRoom"});
@@ -274,26 +274,12 @@ global.io.on('connection', function (socket) {
             return;
         }
 
-        let playerStatus = 0;
-        let room = gameManager.getRoomByRoomNo(roomNo);
-        if (!room) {
-            response({success: "0", message: "房间信息异常，请稍后再试"});
-            return;
-        }
-
-        for (let player of room.players) {
-            if (player.unionId === onlineUser.unionId) {
-                playerStatus = player.status;
-            }
-        }
-
-        let showdownCards = [];
         let game = gameManager.getGameByRoomNo(roomNo);
         if (game) {
-            showdownCards = game.showdownCards;
+            response({success: "1", message: "", data: gameManager.getShowdownInfo(game)});
+        } else {
+            response({success: "0", message: "游戏信息异常，请稍后再试", data});
         }
-
-        response({success: "1", message: "", data: {showdownCards, playerStatus, unionId: onlineUser.unionId}});
     });
 
     socket.on('getTurnInfo', function (roomNo, response) {
