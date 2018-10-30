@@ -18,7 +18,7 @@ const cardManager = {
         let suits = ['spade', 'heart', 'diamond', 'club'];
         for (let i = 1; i <= 13; i++) {
             for (let suit of suits) {
-                if(i < 9 && suit !== 'heart') continue; // 加速测试
+                // if (i < 9 && suit !== 'heart') continue; // 加速测试，每人7张
 
                 let cardInfo = {number: i, suit: suit, point: 0, ex: ''};
 
@@ -214,6 +214,10 @@ const cardManager = {
         return null;
     },
     checkPlayCard(game, unionId, selectedCard) {
+        if (game.currentTurn.turnPlayer !== unionId) {
+            return {success: "0", message: "轮次错误，出牌失败"};
+        }
+
         let myCards = [];
         for (let player of game.players) {
             if (player.unionId === unionId) {
