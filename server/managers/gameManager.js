@@ -186,10 +186,10 @@ const gameManager = {
             game.currentTurn.turnPlayer = game.players[game.currentTurn.firstIndex].unionId;
         }
         else {
-            game.currentTurn.turnPlayer = null;
-            this.gameOver(game);
+            setTimeout(function(){
+                gameManager.gameOver(game);
+            }, 1500);
         }
-
         global.io.in("room" + game.roomNo).emit("notify", {
             type: "updateTurn",
             data: this.getClientTurnInfo(game)
@@ -209,6 +209,43 @@ const gameManager = {
     gameOver(game) {
         let gameScore = cardManager.getFinalScore(game);
         console.log(gameScore);
+
+        let room = this.getRoomByRoomNo(game.roomNo);
+
+        for (let player of room.players) {
+            player.status = 0;
+        }
+
+        for (let player of game.players) {
+            player.cards = [];
+            player.isShowdown = 0;
+        }
+
+        game.turn = 0;
+        game.firstDealerIndex = 0;
+        game.showdownCards = [];
+        game.pointCards = [];
+        game.playedCards = [];
+        game.suitPlayStatus = {spade: 0, heart: 0, diamond: 0, club: 0}
+        game.currentTurn.firstIndex = 0;
+        game.currentTurn.turnPlayer = null;
+        game.currentTurn.turnCards = [];
+        game.currentTurn.turnTimeout = 0;
+        game.currentTurn.firstSuit = '';
+
+        room.status = 0;
+
+        global.io.in("room" + game.roomNo).emit("notify", {
+            type: "gameOver",
+            data: gameScore
+        });
+
+        for (let i = global.games.length - 1; i >= 0; i--) {
+            if (game.gameId === global.games[i]) {
+                global.games.splice(i, 1);
+            }
+        }
+        room.gameId = '';
     }
 };
 

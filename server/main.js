@@ -12,7 +12,7 @@ global.logger.info("服务器已启动");
 setInterval(function () {
     for (let game of global.games) {
         let room = gameManager.getRoomByRoomNo(game.roomNo);
-        if (room.status !== 2) {
+        if (room == null || room.status !== 2 || !game.currentTurn) {
             continue;
         }
         if (game.currentTurn.turnTimeout > 0) {
@@ -319,7 +319,7 @@ global.io.on('connection', function (socket) {
         }
 
         let checkResult = cardManager.checkPlayCard(game, onlineUser.unionId, selectedCard);
-        if(checkResult.success !== "1"){
+        if (checkResult.success !== "1") {
             response(checkResult);
             return;
         }

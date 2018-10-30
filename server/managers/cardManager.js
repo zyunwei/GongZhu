@@ -18,6 +18,8 @@ const cardManager = {
         let suits = ['spade', 'heart', 'diamond', 'club'];
         for (let i = 1; i <= 13; i++) {
             for (let suit of suits) {
+                if(i < 9 && suit !== 'heart') continue; // 加速测试
+
                 let cardInfo = {number: i, suit: suit, point: 0, ex: ''};
 
                 if (suit === 'spade' && i === 12) {
@@ -279,8 +281,8 @@ const cardManager = {
 
         let isFirstRound = game.suitPlayStatus[selectedCard.suit] === 0;
 
-        // 花色首轮不能出卖过的牌
-        if (!firstSuit && isFirstRound && isShowdownCard) {
+        // 花色首轮不能出卖过的牌,除非只剩下一张
+        if (!firstSuit && isFirstRound && isShowdownCard && myCards.length > 1) {
             switch (selectedCard.suit) {
                 case 'spade':
                     if (selectedCard.number === 12) {

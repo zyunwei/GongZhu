@@ -28,7 +28,7 @@ cc.Class({
                 this.Status.string = "游戏中";
                 break;
             default:
-                this.Status.string = "结算中";
+                this.Status.string = "异常";
                 break;
         }
     },

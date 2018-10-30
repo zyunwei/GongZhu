@@ -48,6 +48,7 @@ cc.Class({
             let lastUpdate = null;
             let lastTurnInfo = null;
             let lastShowdownInfo = null;
+            let lastGameOverInfo = null;
             while (global.notifyQueue.length > 0) {
                 let notify = global.notifyQueue.shift();
                 if (notify) {
@@ -61,24 +62,26 @@ cc.Class({
                         case "updateTurn":
                             lastTurnInfo = notify.data;
                             break;
+                        case "gameOver":
+                            lastGameOverInfo = notify.data;
+                            break;
                     }
                 }
             }
             if (lastUpdate != null) {
-                //console.log("updateRoom");
                 this.updateRoom();
             }
 
             if (lastShowdownInfo != null) {
-                //console.log("updateShowdown");
-                //console.log(lastShowdownInfo);
                 this.updateShowdown(self, lastShowdownInfo);
             }
 
             if (lastTurnInfo != null) {
-                //console.log("updateTurn");
-                //console.log(lastTurnInfo);
                 this.updateTurn(self, lastTurnInfo);
+            }
+
+            if(lastGameOverInfo != null){
+                this.gameOver(self, lastGameOverInfo);
             }
         }, 0.3);
 
@@ -549,6 +552,29 @@ cc.Class({
             } else {
                 utils.messageBox("失败", result.message);
             }
+        });
+    },
+    gameOver(self, data) {
+        utils.messageBox("本轮结束", JSON.stringify(data), function () {
+            self.isInitCards = false;
+            self.roomStatus = 0;
+            self.myPosition = 0;
+            self.localTurnCards = [];
+            self.localPointCards = [];
+            self.node.getChildByName("showdownSouth").destroyAllChildren();
+            self.node.getChildByName("showdownEast").destroyAllChildren();
+            self.node.getChildByName("showdownNorth").destroyAllChildren();
+            self.node.getChildByName("showdownWest").destroyAllChildren();
+
+            self.node.getChildByName("pointCardsSouth").destroyAllChildren();
+            self.node.getChildByName("pointCardsEast").destroyAllChildren();
+            self.node.getChildByName("pointCardsNorth").destroyAllChildren();
+            self.node.getChildByName("pointCardsWest").destroyAllChildren();
+
+            self.node.getChildByName("myCards").removeAllChildren(true);
+
+            self.onLoad();
+            self.updateRoom();
         });
     }
 });
