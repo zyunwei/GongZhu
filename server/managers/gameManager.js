@@ -196,8 +196,7 @@ const gameManager = {
     },
     autoPlayTurn(game) {
         if (game.turnPlayer < 0) return;
-        let cardInfo = this.getCardByUnionId(game, game.currentTurn.turnPlayer);
-        let selectedCard = cardManager.getAutoPlayCard(game.currentTurn.turnCards, cardInfo);
+        let selectedCard = cardManager.getAutoPlayCard(game, game.currentTurn.turnPlayer);
         if (selectedCard) {
             this.playCard(game, game.currentTurn.turnPlayer, selectedCard);
             global.io.in("room" + game.roomNo).emit("notify", {

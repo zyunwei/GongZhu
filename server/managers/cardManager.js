@@ -155,8 +155,17 @@ const cardManager = {
         }
         return pointCards;
     },
-    getAutoPlayCard(turnCards, myCards) {
+    getAutoPlayCard(game, unionId) {
         // 自动出牌
+        let turnCards = game.currentTurn.turnCards;
+        let myCards = [];
+        for (let player of game.players) {
+            if (player.unionId === game.currentTurn.turnPlayer) {
+                myCards = player.cards;
+                break;
+            }
+        }
+
         // 梅花2
         for (let card of myCards) {
             if (card.suit === "club" && card.number === 2) {
@@ -166,17 +175,25 @@ const cardManager = {
 
         // 自动出当前花色
         if (turnCards.length > 0) {
-            let firstSuit = turnCards[0];
+            let firstSuit = turnCards[0].suit;
             for (let card of myCards) {
-                if (card.suit === firstSuit.suit) {
-                    return card;
+                if (card.suit === firstSuit) {
+                    let checkResult = this.checkPlayCard(game, unionId, card);
+                    if (checkResult.success === '1') {
+                        return card;
+                    }
                 }
             }
         }
 
-        // 自动出最后一张
+        // 随便选一张能出的牌出
         if (myCards.length > 0) {
-            return myCards[myCards.length - 1];
+            for (let i = myCards.length - 1; i >= 0; i--) {
+                let checkResult = this.checkPlayCard(game, unionId, myCards[i]);
+                if (checkResult.success === '1') {
+                    return myCards[i];
+                }
+            }
         }
 
         return null;
@@ -186,6 +203,7 @@ const cardManager = {
         for (let player of game.players) {
             if (player.unionId === unionId) {
                 myCards = player.cards;
+                break;
             }
         }
 
@@ -197,7 +215,7 @@ const cardManager = {
                 break;
             }
         }
-        if(!isLegal){
+        if (!isLegal) {
             return {success: "0", message: "出牌信息异常，请重新登录游戏"};
         }
 
