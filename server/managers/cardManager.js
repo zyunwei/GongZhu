@@ -17,7 +17,7 @@ const cardManager = {
                 else if (suit === 'club' && i === 10) {
                     cardInfo.point = 50;
                     cardInfo.ex = 'double';
-                } else if( suit == 'heart'){
+                } else if (suit == 'heart') {
                     cardInfo.ex = 'point';
                     switch (i) {
                         case 1:
@@ -145,30 +145,29 @@ const cardManager = {
         // 牌大小比较
         return cardNumber === 1 ? 14 : cardNumber;
     },
-    getPointCards(turnCards){
+    getPointCards(turnCards) {
         // 牌点数
         let pointCards = [];
-        for(let card of turnCards){
-            if(card.ex !== ''){
+        for (let card of turnCards) {
+            if (card.ex !== '') {
                 pointCards.push(card);
             }
         }
         return pointCards;
     },
-    getAutoPlayCard(turnCards, myCards){
+    getAutoPlayCard(turnCards, myCards) {
         // 自动出牌
         // 梅花2
-        for(let card of myCards){
+        for (let card of myCards) {
             if (card.suit === "club" && card.number === 2) {
                 return card;
             }
         }
 
         // 自动出当前花色
-        if(turnCards.length > 0)
-        {
+        if (turnCards.length > 0) {
             let firstSuit = turnCards[0];
-            for(let card of myCards){
+            for (let card of myCards) {
                 if (card.suit === firstSuit.suit) {
                     return card;
                 }
@@ -176,11 +175,142 @@ const cardManager = {
         }
 
         // 自动出最后一张
-        if(myCards.length > 0){
+        if (myCards.length > 0) {
             return myCards[myCards.length - 1];
         }
 
         return null;
+    },
+    checkPlayCard(game, unionId, selectedCard) {
+        let myCards = [];
+        for (let player of game.players) {
+            if (player.unionId === unionId) {
+                myCards = player.cards;
+            }
+        }
+
+        // 判断出的牌是自己的牌
+        let isLegal = false;
+        for (let card of myCards) {
+            if (card.suit === selectedCard.suit && card.number === selectedCard.number) {
+                isLegal = true;
+                break;
+            }
+        }
+        if(!isLegal){
+            return {success: "0", message: "出牌信息异常，请重新登录游戏"};
+        }
+
+        // 必须先出梅花2
+        let hasClub2 = false;
+        for (let card of myCards) {
+            if (card.suit === "club" && card.number === 2) {
+                hasClub2 = true;
+                break;
+            }
+        }
+
+        if (hasClub2 && (selectedCard.suit !== "club" || selectedCard.number !== 2)) {
+            return {success: "0", message: "请先出梅花2"}
+        }
+
+        // 有相同花色必须先出
+        let hasSameSuit = false;
+        let firstSuit = null;
+        if (game.currentTurn.turnCards.length > 0) {
+            firstSuit = game.currentTurn.turnCards[0].suit;
+            for (let card of myCards) {
+                if (card.suit === firstSuit.suit) {
+                    hasSameSuit = true;
+                    break;
+                }
+            }
+        }
+
+        if (firstSuit && hasSameSuit && (selectedCard.suit !== firstSuit)) {
+            return {success: "0", message: "必须出相同花色"}
+        }
+
+        let showdownCards = [];
+        for (let showdown of game.showdownCards) {
+            for (let card of showdown) {
+                showdownCards.push(card);
+            }
+        }
+
+        let isShowdownCard = false;
+        for (let showdown of showdownCards) {
+            if (showdown.suit === selectedCard.suit && showdown.number === selectedCard.number) {
+                isShowdownCard = true;
+                break;
+            }
+        }
+
+        let isFirstRound = game.suitPlayStatus[selectedCard.suit] === 0;
+
+        // 花色首轮不能出卖过的牌
+        if (!firstSuit && isFirstRound && isShowdownCard) {
+            switch (selectedCard.suit) {
+                case 'spade':
+                    if (selectedCard.number === 12) {
+                        return {success: "0", message: "黑桃Q已亮牌，不能在黑桃首轮出"};
+                    }
+                    break;
+                case 'heart':
+                    if (selectedCard.number === 1) {
+                        return {success: "0", message: "红桃A已亮牌，不能在红桃首轮出"};
+                    }
+                    break;
+                case 'diamond':
+                    if (selectedCard.number === 11) {
+                        return {success: "0", message: "方片J已亮牌，不能在方片首轮出"};
+                    }
+                    break;
+                case 'club':
+                    if (selectedCard.number === 10) {
+                        return {success: "0", message: "梅花10已亮牌，不能在梅花首轮出"};
+                    }
+                    break;
+            }
+        }
+
+        // 花色首轮不能跟亮过的牌，但只有一张时可以跟
+        if (firstSuit && isFirstRound && isShowdownCard) {
+            let sameSuitCount = 0;
+            for (let card of myCards) {
+                if (card.suit === firstSuit) {
+                    sameSuitCount += 1;
+                }
+            }
+
+            if (sameSuitCount > 1) {
+                switch (selectedCard.suit) {
+                    case 'spade':
+                        if (selectedCard.number === 12) {
+                            return {success: "0", message: "黑桃Q已亮牌，请出其它黑桃牌"};
+                        }
+                        break;
+                    case 'heart':
+                        if (selectedCard.number === 1) {
+                            return {success: "0", message: "红桃A已亮牌，请出其它红桃牌"};
+                        }
+                        break;
+                    case 'diamond':
+                        if (selectedCard.number === 11) {
+                            return {success: "0", message: "方片J已亮牌，请出其它方片牌"};
+                        }
+                        break;
+                    case 'club':
+                        if (selectedCard.number === 10) {
+                            return {success: "0", message: "梅花10已亮牌，请出其它梅花牌"};
+                        }
+                        break;
+                }
+            }
+        }
+
+
+        return {success: "1", message: ""};
     }
 };
 

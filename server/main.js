@@ -1,6 +1,7 @@
 import global from './global';
 import userManager from './managers/userManager';
 import gameManager from './managers/gameManager';
+import cardManager from "./managers/cardManager";
 
 const io = require('socket.io')(3000);
 
@@ -314,6 +315,12 @@ global.io.on('connection', function (socket) {
         let game = gameManager.getGameByRoomNo(room.no);
         if (!game) {
             response({success: "0", message: "游戏信息异常，请稍后再试"});
+            return;
+        }
+
+        let checkResult = cardManager.checkPlayCard(game, onlineUser.unionId, selectedCard);
+        if(checkResult.success !== "1"){
+            response(checkResult);
             return;
         }
 

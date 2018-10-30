@@ -51,7 +51,6 @@ cc.Class({
             while (global.notifyQueue.length > 0) {
                 let notify = global.notifyQueue.shift();
                 if (notify) {
-
                     switch (notify.type) {
                         case "updateRoom":
                             lastUpdate = 1;
@@ -502,7 +501,7 @@ cc.Class({
                     }
                 }
             } else {
-                utils.messageBox("失败", result.message);
+                utils.messageBox("提示", result.message);
             }
         });
     },

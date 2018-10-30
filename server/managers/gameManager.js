@@ -30,7 +30,8 @@ const gameManager = {
             showdownCards: [[], [], [], []],
             pointCards: [[], [], [], []],
             playedCards: [],
-        }
+            suitPlayStatus: {spade: 0, heart: 0, diamond: 0, club: 0}
+        };
 
         let cards = cardManager.getAllCard();
         cards = cardManager.shuffle(cards);
@@ -159,6 +160,7 @@ const gameManager = {
                     }
 
                     if (game.currentTurn.turnCards.length >= 4) {
+                        game.suitPlayStatus[turnCard.suit] = 1;
                         let bigPlayerIndex = cardManager.getBigPlayerIndex(game.currentTurn.turnCards);
                         let self = this;
                         setTimeout(function () {
