@@ -25,7 +25,15 @@ cc.Class({
         roomStatus: 0,
         myPosition: 0,
         localTurnCards: [],
-        localPointCards: []
+        localPointCards: [],
+        lblRoomNo: {
+            default: null,
+            type: cc.Label
+        },
+        lblRoundNo: {
+            default: null,
+            type: cc.Label
+        },
     },
     onLoad() {
         this.localPointCards = [[], [], [], []];
@@ -80,7 +88,7 @@ cc.Class({
                 this.updateTurn(self, lastTurnInfo);
             }
 
-            if(lastGameOverInfo != null){
+            if (lastGameOverInfo != null) {
                 this.gameOver(self, lastGameOverInfo);
             }
         }, 0.3);
@@ -120,6 +128,9 @@ cc.Class({
         let self = this;
         global.net.getRoomInfo(global.roomNo, function (result) {
             if (result.success === "1") {
+                self.lblRoomNo.string = "房间：" + result.data.roomNo;
+                self.lblRoundNo.string = "局数：" + result.data.round;
+
                 self.playerInfos.forEach(function (e) {
                     e.active = false;
                 });
@@ -192,8 +203,8 @@ cc.Class({
     updateShowdown: function (self, showdowns) {
         // 亮牌操作按钮相关
         let myCards = self.node.getChildByName("myCards");
-        for(let showdown of showdowns){
-            if(showdown.unionId === global.loginInfo.unionId){
+        for (let showdown of showdowns) {
+            if (showdown.unionId === global.loginInfo.unionId) {
                 if (showdown.isShowdown !== 1) {
                     self.node.getChildByName("btnShowdown").active = true;
                     self.node.getChildByName("btnDoNotShowdown").active = true;
@@ -247,7 +258,7 @@ cc.Class({
 
             if (showdownBox != null) {
                 showdownBox.destroyAllChildren();
-                if(showdowns[i].showdownCards.length > 0){
+                if (showdowns[i].showdownCards.length > 0) {
                     for (let j = 0; j < showdowns[i].showdownCards.length; j++) {
                         let showCard = cc.instantiate(self.smallPokerDemo);
                         let pokerScript = showCard.getComponent("pokerCard");
@@ -255,7 +266,7 @@ cc.Class({
                         showCard.parent = showdownBox;
                     }
                 }
-                else if (showdowns[i].isShowdown === 1){
+                else if (showdowns[i].isShowdown === 1) {
                     let noShowdownMark = cc.instantiate(self.noShowdownMark);
                     noShowdownMark.parent = showdownBox;
                 }

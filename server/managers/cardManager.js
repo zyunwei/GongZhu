@@ -1,4 +1,5 @@
 import global from "../global";
+import gameManager from "./gameManager";
 
 const cardManager = {
     getShowdownInfo(game) {
@@ -18,7 +19,7 @@ const cardManager = {
         let suits = ['spade', 'heart', 'diamond', 'club'];
         for (let i = 1; i <= 13; i++) {
             for (let suit of suits) {
-                // if (i < 9 && suit !== 'heart') continue; // 加速测试，每人7张
+                if (i < 9 && suit !== 'heart') continue; // 加速测试，每人7张
 
                 let cardInfo = {number: i, suit: suit, point: 0, ex: ''};
 
@@ -182,9 +183,12 @@ const cardManager = {
         }
 
         // 梅花2
-        for (let card of myCards) {
-            if (card.suit === "club" && card.number === 2) {
-                return card;
+        let room = gameManager.getRoomByRoomNo(game.roomNo);
+        if(room.round <= 1){
+            for (let card of myCards) {
+                if (card.suit === "club" && card.number === 2) {
+                    return card;
+                }
             }
         }
 
@@ -238,17 +242,20 @@ const cardManager = {
             return {success: "0", message: "出牌信息异常，请重新登录游戏"};
         }
 
-        // 必须先出梅花2
-        let hasClub2 = false;
-        for (let card of myCards) {
-            if (card.suit === "club" && card.number === 2) {
-                hasClub2 = true;
-                break;
+        // 首轮先出梅花2
+        let room = gameManager.getRoomByRoomNo(game.roomNo);
+        if(room.round <= 1) {
+            let hasClub2 = false;
+            for (let card of myCards) {
+                if (card.suit === "club" && card.number === 2) {
+                    hasClub2 = true;
+                    break;
+                }
             }
-        }
 
-        if (hasClub2 && (selectedCard.suit !== "club" || selectedCard.number !== 2)) {
-            return {success: "0", message: "请先出梅花2"}
+            if (hasClub2 && (selectedCard.suit !== "club" || selectedCard.number !== 2)) {
+                return {success: "0", message: "此局为首轮游戏，请先出梅花2"}
+            }
         }
 
         // 有相同花色必须先出
@@ -465,6 +472,13 @@ const cardManager = {
                         }
                     }
                 } else if (game.pointCards[i][j].ex === 'pig') {
+                    // 记录下一局先出牌者
+                    let room = gameManager.getRoomByRoomNo(game.roomNo);
+                    if(room){
+                        room.lastPig = i;
+                        room.round += 1;
+                    }
+
                     // 全收
                     if (isAllIn) {
                         if (isShowdownPig) {

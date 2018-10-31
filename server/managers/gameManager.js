@@ -33,11 +33,16 @@ const gameManager = {
                 cards: cards[i],
                 isShowdown: 0
             });
-            cards[i].some(function (ee, ii) {
-                if (ee.suit === "club" && ee.number === 2) {
-                    newGame.firstDealerIndex = i;
-                }
-            });
+
+            if(room.round <= 1){
+                cards[i].some(function (ee, ii) {
+                    if (ee.suit === "club" && ee.number === 2) {
+                        newGame.firstDealerIndex = i;
+                    }
+                });
+            } else{
+                newGame.firstDealerIndex = room.lastPig;
+            }
         });
 
         room.gameId = newGame.gameId;

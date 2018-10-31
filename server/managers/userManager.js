@@ -122,7 +122,9 @@ const userManager = {
             no: roomNo,
             type: roomType,
             players: [],
-            status: 0
+            status: 0,
+            round: 1,
+            lastPig: -1
         };
 
         global.rooms.push(roomInfo);
