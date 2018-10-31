@@ -208,12 +208,12 @@ global.io.on('connection', function (socket) {
                     if (global.rooms[i].players[j].unionId === onlineUser.unionId) {
                         // 断线重连加入
                         global.rooms[i].players[j].isOnline = 1;
+                        global.rooms[i].players[j].socketId = socket.id;
                         let roomNo = global.rooms[i].no;
                         socket.leaveAll();
                         socket.join("room" + roomNo);
                         socket.in("lobby").emit("notify", {type: "updateLobby"});
                         socket.in("room" + roomNo).emit("notify", {type: "updateRoom"});
-                        console.log(onlineUser.unionId + " 断线重连后加入房间：" + roomNo);
 
                         response({success: "1", message: "", data: roomNo});
                         return;

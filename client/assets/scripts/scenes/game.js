@@ -135,7 +135,6 @@ cc.Class({
     },
     showReadyCountdown() {
         this.lblCenterCountdown.string = "请点击准备.. " + this.readyCountdown;
-        this.lblCenterCountdown.active = true;
         this.readyCountdown -= 1;
         if (this.readyCountdown < 0) {
             this.lblCenterCountdown.string = "";
@@ -144,7 +143,6 @@ cc.Class({
     },
     showShowdownCountdown() {
         this.lblCenterCountdown.string = "请亮牌.. " + this.showdownCountdown;
-        this.lblCenterCountdown.active = true;
         this.showdownCountdown -= 1;
         if (this.showdownCountdown < 0) {
             this.lblCenterCountdown.string = "";
@@ -185,7 +183,8 @@ cc.Class({
 
                             if (result.data.status === 0 && result.data.userList.length === 4 && e.status === 0) {
                                 self.readyCountdown = result.data.readyCountdown;
-                                self.schedule(self.showReadyCountdown, 1, self.readyCountdown);
+                                self.lblCenterCountdown.active = true;
+                                self.schedule(self.showReadyCountdown, 1, self.readyCountdown, 0.01);
                             } else {
                                 self.unschedule(self.showReadyCountdown);
                                 self.lblCenterCountdown.string = "";
@@ -215,7 +214,8 @@ cc.Class({
 
                 if (self.roomStatus === 1) {
                     self.showdownCountdown = result.data.showdownCountdown;
-                    self.schedule(self.showShowdownCountdown, 1, self.showdownCountdown);
+                    self.lblCenterCountdown.active = true;
+                    self.schedule(self.showShowdownCountdown, 1, self.showdownCountdown, 0.01);
                 } else {
                     self.unschedule(self.showShowdownCountdown);
                     self.lblCenterCountdown.string = "";
@@ -276,6 +276,13 @@ cc.Class({
                 } else {
                     self.node.getChildByName("btnShowdown").active = false;
                     self.node.getChildByName("btnDoNotShowdown").active = false;
+                    self.unschedule(self.showShowdownCountdown);
+                    self.lblCenterCountdown.string = "";
+                    self.lblCenterCountdown.active = false;
+                    for (let i = myCards.children.length - 1; i >= 0; i--) {
+                        let pokerCard = myCards.children[i].getComponent("pokerCard");
+                        pokerCard.setDefault();
+                    }
                 }
                 break;
             }
@@ -304,7 +311,7 @@ cc.Class({
 
             if (showdownBox != null) {
                 showdownBox.destroyAllChildren();
-                if (showdowns[i].showdownCards.length > 0) {
+                if (showdowns[i].showdownCards && showdowns[i].showdownCards.length > 0) {
                     for (let j = 0; j < showdowns[i].showdownCards.length; j++) {
                         let showCard = cc.instantiate(self.smallPokerDemo);
                         let pokerScript = showCard.getComponent("pokerCard");
@@ -552,6 +559,7 @@ cc.Class({
             return;
         }
 
+        this.node.getChildByName("btnPlayCard").active = false;
         global.net.playCard(selectedCard, function (result) {
             if (result.success === "1") {
                 for (let i = myCards.children.length - 1; i >= 0; i--) {
@@ -561,6 +569,7 @@ cc.Class({
                     }
                 }
             } else {
+                this.node.getChildByName("btnPlayCard").active = true;
                 utils.messageBox("提示", result.message);
             }
         });
@@ -590,7 +599,7 @@ cc.Class({
                 }
                 self.node.getChildByName("btnShowdown").active = false;
                 self.node.getChildByName("btnDoNotShowdown").active = false;
-                self.unschedule(self.showReadyCountdown);
+                self.unschedule(self.showShowdownCountdown);
                 self.lblCenterCountdown.string = "";
                 self.lblCenterCountdown.active = false;
             } else {
@@ -609,7 +618,7 @@ cc.Class({
                 }
                 self.node.getChildByName("btnShowdown").active = false;
                 self.node.getChildByName("btnDoNotShowdown").active = false;
-                self.unschedule(self.showReadyCountdown);
+                self.unschedule(self.showShowdownCountdown);
                 self.lblCenterCountdown.string = "";
                 self.lblCenterCountdown.active = false;
             } else {
