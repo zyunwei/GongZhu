@@ -34,12 +34,19 @@ cc.Class({
             default: null,
             type: cc.Label
         },
+        lblCenterCountdown: {
+            default: null,
+            type: cc.Label
+        },
+        readyCountdown: 0,
+        showdownCountdown: 0,
     },
     onLoad() {
         this.localPointCards = [[], [], [], []];
         this.node.getChildByName("btnPlayCard").active = false;
         this.node.getChildByName("btnShowdown").active = false;
         this.node.getChildByName("btnDoNotShowdown").active = false;
+        this.lblCenterCountdown.active = false;
     },
     start() {
         if (!global.net.socket) {
@@ -126,6 +133,24 @@ cc.Class({
             }
         });
     },
+    showReadyCountdown() {
+        this.lblCenterCountdown.string = "请点击准备.. " + this.readyCountdown;
+        this.lblCenterCountdown.active = true;
+        this.readyCountdown -= 1;
+        if (this.readyCountdown < 0) {
+            this.lblCenterCountdown.string = "";
+            this.lblCenterCountdown.active = false;
+        }
+    },
+    showShowdownCountdown() {
+        this.lblCenterCountdown.string = "请亮牌.. " + this.showdownCountdown;
+        this.lblCenterCountdown.active = true;
+        this.showdownCountdown -= 1;
+        if (this.showdownCountdown < 0) {
+            this.lblCenterCountdown.string = "";
+            this.lblCenterCountdown.active = false;
+        }
+    },
     updateRoom: function () {
         // 更新房间信息
         let self = this;
@@ -157,6 +182,15 @@ cc.Class({
 
                         if (showIndex === 0) {
                             self.node.getChildByName("btnReady").active = e.status === 0;
+
+                            if (result.data.status === 0 && result.data.userList.length === 4 && e.status === 0) {
+                                self.readyCountdown = result.data.readyCountdown;
+                                self.schedule(self.showReadyCountdown, 1, self.readyCountdown);
+                            } else {
+                                self.unschedule(self.showReadyCountdown);
+                                self.lblCenterCountdown.string = "";
+                                self.lblCenterCountdown.active = false;
+                            }
                         }
                     }
                 });
@@ -177,6 +211,15 @@ cc.Class({
 
                 if (self.roomStatus !== 0) {
                     self.initCard(self);
+                }
+
+                if (self.roomStatus === 1) {
+                    self.showdownCountdown = result.data.showdownCountdown;
+                    self.schedule(self.showShowdownCountdown, 1, self.showdownCountdown);
+                } else {
+                    self.unschedule(self.showShowdownCountdown);
+                    self.lblCenterCountdown.string = "";
+                    self.lblCenterCountdown.active = false;
                 }
             } else {
                 utils.messageBox("错误", result.message);
@@ -547,6 +590,9 @@ cc.Class({
                 }
                 self.node.getChildByName("btnShowdown").active = false;
                 self.node.getChildByName("btnDoNotShowdown").active = false;
+                self.unschedule(self.showReadyCountdown);
+                self.lblCenterCountdown.string = "";
+                self.lblCenterCountdown.active = false;
             } else {
                 utils.messageBox("失败", result.message);
             }
@@ -563,6 +609,9 @@ cc.Class({
                 }
                 self.node.getChildByName("btnShowdown").active = false;
                 self.node.getChildByName("btnDoNotShowdown").active = false;
+                self.unschedule(self.showReadyCountdown);
+                self.lblCenterCountdown.string = "";
+                self.lblCenterCountdown.active = false;
             } else {
                 utils.messageBox("失败", result.message);
             }

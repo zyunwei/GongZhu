@@ -235,11 +235,15 @@ global.io.on('connection', function (socket) {
         let userList = [];
         let status = null;
         let round = 0;
+        let readyCountdown = 0;
+        let showdownCountdown = 0;
 
         for (let i = 0; i < global.rooms.length; i++) {
             if (global.rooms[i].no !== roomNo) continue;
             status = global.rooms[i].status;
             round = global.rooms[i].round;
+            readyCountdown = global.rooms[i].readyCountdown;
+            showdownCountdown = global.rooms[i].showdownCountdown;
 
             for (let j = 0; j < global.rooms[i].players.length; j++) {
                 let user = global.rooms[i].players[j];
@@ -257,7 +261,7 @@ global.io.on('connection', function (socket) {
         if (userList.length > 0) {
             result.success = "1";
             result.message = "";
-            result.data = {status, userList, roomNo, round};
+            result.data = {status, userList, roomNo, round, readyCountdown, showdownCountdown};
         }
 
         response(result);
