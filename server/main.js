@@ -42,7 +42,7 @@ setInterval(function () {
             }
             else {
                 for (let player of game.players) {
-                    if (game.isShowdown !== 1) {
+                    if (player.isShowdown !== 1) {
                         forceShowdown.push(player);
                     }
                 }

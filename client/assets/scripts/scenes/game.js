@@ -559,7 +559,7 @@ cc.Class({
             return;
         }
 
-        this.node.getChildByName("btnPlayCard").active = false;
+        self.node.getChildByName("btnPlayCard").active = false;
         global.net.playCard(selectedCard, function (result) {
             if (result.success === "1") {
                 for (let i = myCards.children.length - 1; i >= 0; i--) {
@@ -569,7 +569,7 @@ cc.Class({
                     }
                 }
             } else {
-                this.node.getChildByName("btnPlayCard").active = true;
+                self.node.getChildByName("btnPlayCard").active = true;
                 utils.messageBox("提示", result.message);
             }
         });

@@ -10,7 +10,7 @@ const gameManager = {
         }
     },
     startShowdown(room) {
-        room.showdownCountdown = 8;
+        room.showdownCountdown = 15;
 
         let newGame = {
             gameId: new Date().getTime(),
@@ -109,6 +109,7 @@ const gameManager = {
     // 亮牌
     showdown(game, unionId, selectedCard) {
         let showdownFinishCount = 0;
+
         for (let i = 0; i < game.players.length; i++) {
             if (game.players[i].unionId === unionId) {
                 for (let card of selectedCard) {
@@ -218,31 +219,14 @@ const gameManager = {
         console.log(gameScore);
 
         let room = this.getRoomByRoomNo(game.roomNo);
+        room.status = 0;
+        room.readyCountdown = 15;
+        room.showdownCountdown = 15;
+        room.gameId = '';
 
         for (let player of room.players) {
             player.status = 0;
         }
-
-        for (let player of game.players) {
-            player.cards = [];
-            player.isShowdown = 0;
-        }
-
-        game.turn = 0;
-        game.firstDealerIndex = 0;
-        game.showdownCards = [];
-        game.pointCards = [];
-        game.playedCards = [];
-        game.suitPlayStatus = {spade: 0, heart: 0, diamond: 0, club: 0}
-        game.currentTurn.firstIndex = 0;
-        game.currentTurn.turnPlayer = null;
-        game.currentTurn.turnCards = [];
-        game.currentTurn.turnTimeout = 0;
-        game.currentTurn.firstSuit = '';
-
-        room.status = 0;
-        room.readyCountdown = 15;
-        room.showdownCountdown = 8;
 
         global.io.in("room" + game.roomNo).emit("notify", {
             type: "gameOver",
@@ -250,11 +234,10 @@ const gameManager = {
         });
 
         for (let i = global.games.length - 1; i >= 0; i--) {
-            if (game.gameId === global.games[i]) {
+            if (game.gameId === global.games[i].gameId) {
                 global.games.splice(i, 1);
             }
         }
-        room.gameId = '';
     }
 };
 
