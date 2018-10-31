@@ -10,15 +10,56 @@ global.logger.info("服务器已启动");
 
 // 服务端倒计时控制
 setInterval(function () {
+    for (let room of global.rooms) {
+        if (room.status === 0 && room.players.length >= 4) {
+            // 准备倒计时
+            let toBeKicked = [];
+            if (room.readyCountdown > 0) {
+                room.readyCountdown -= 1;
+            } else {
+                // 把超时没有准备的人踢出房间
+                for (let player of room.players) {
+                    if (player.status !== 1) {
+                        toBeKicked.push(player);
+                    }
+                }
+            }
+            for (let player of toBeKicked) {
+                userManager.forceKickOut(player, room);
+            }
+        }
+    }
+
     for (let game of global.games) {
         let room = gameManager.getRoomByRoomNo(game.roomNo);
-        if (room == null || room.status !== 2 || !game.currentTurn) {
-            continue;
+        if (room == null) continue;
+
+        if (room.status === 1) {
+            // 亮牌倒计时
+            let forceShowdown = [];
+            if (room.showdownCountdown > 0) {
+                room.showdownCountdown -= 1;
+            }
+            else {
+                for (let player of game.players) {
+                    if (game.isShowdown !== 1) {
+                        forceShowdown.push(player);
+                    }
+                }
+            }
+            for (let player of forceShowdown) {
+                // 超时默认不亮牌
+                gameManager.showdown(game, player.unionId, []);
+            }
         }
-        if (game.currentTurn.turnTimeout > 0) {
-            game.currentTurn.turnTimeout -= 1;
-        } else {
-            gameManager.autoPlayTurn(game);
+
+        if (room.status === 2 && game.currentTurn) {
+            // 出牌倒计时
+            if (game.currentTurn.turnTimeout > 0) {
+                game.currentTurn.turnTimeout -= 1;
+            } else {
+                gameManager.autoPlayTurn(game);
+            }
         }
     }
 }, 1000);
@@ -216,7 +257,7 @@ global.io.on('connection', function (socket) {
         if (userList.length > 0) {
             result.success = "1";
             result.message = "";
-            result.data = {status, userList, roomNo, round };
+            result.data = {status, userList, roomNo, round};
         }
 
         response(result);

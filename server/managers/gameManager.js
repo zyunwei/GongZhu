@@ -10,6 +10,8 @@ const gameManager = {
         }
     },
     startShowdown(room) {
+        room.showdownCountdown = 8;
+
         let newGame = {
             gameId: new Date().getTime(),
             roomNo: room.no,
@@ -239,6 +241,8 @@ const gameManager = {
         game.currentTurn.firstSuit = '';
 
         room.status = 0;
+        room.readyCountdown = 15;
+        room.showdownCountdown = 8;
 
         global.io.in("room" + game.roomNo).emit("notify", {
             type: "gameOver",

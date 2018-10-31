@@ -32,7 +32,12 @@ utils.messageBox = function (title, text, callback) {
         let msgBoxPrefab = cc.instantiate(prefab);
         let msgBox = msgBoxPrefab.getComponent("messageBox");
         msgBox.init(title, text, callback);
-        currentScene.addChild(msgBoxPrefab);
+        try {
+            currentScene.addChild(msgBoxPrefab);
+        }
+        catch (err) {
+            msgBoxPrefab.destroy();
+        }
     });
 };
 

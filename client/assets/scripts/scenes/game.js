@@ -73,6 +73,9 @@ cc.Class({
                         case "gameOver":
                             lastGameOverInfo = notify.data;
                             break;
+                        case "leaveRoom":
+                            cc.director.loadScene("lobby");
+                            break;
                     }
                 }
             }
@@ -128,7 +131,7 @@ cc.Class({
         let self = this;
         global.net.getRoomInfo(global.roomNo, function (result) {
             if (result.success === "1") {
-                self.lblRoomNo.string = "房间：" + result.data.roomNo;
+                self.lblRoomNo.string = "房号：" + result.data.roomNo;
                 self.lblRoundNo.string = "局数：" + result.data.round;
 
                 self.playerInfos.forEach(function (e) {

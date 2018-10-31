@@ -41,8 +41,8 @@
     },
     "_scale": {
       "__type__": "cc.Vec3",
-      "x": 0.6021299999022393,
-      "y": 0.6021299999022393,
+      "x": 0.7111111111111111,
+      "y": 0.7111111111111111,
       "z": 1
     },
     "_quat": {
@@ -468,8 +468,8 @@
     "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_useOriginalSize": false,
-    "_string": "房间：1",
-    "_N$string": "房间：1",
+    "_string": "房号：1",
+    "_N$string": "房号：1",
     "_fontSize": 20,
     "_lineHeight": 20,
     "_enableWrapText": true,

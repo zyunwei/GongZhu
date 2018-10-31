@@ -2,9 +2,9 @@ import userDal from '../dal/userDal';
 import global from "../global";
 
 const userManager = {
-    checkOnlineUser(userInfo){
+    checkOnlineUser(userInfo) {
         let success = true;
-        for(let i = 0; i < global.onlineUsers.length; i++){
+        for (let i = 0; i < global.onlineUsers.length; i++) {
             if (global.onlineUsers[i].unionId === userInfo.unionId ||
                 global.onlineUsers[i].socketId === userInfo.socketId) {
                 console.log("用户重复登录:" + userInfo.unionId);
@@ -14,7 +14,7 @@ const userManager = {
 
         return success;
     },
-    getUserByUnionId(unionId){
+    getUserByUnionId(unionId) {
         let onlineUser = null;
         global.onlineUsers.some(function (e, i) {
             if (e.unionId === unionId) {
@@ -23,7 +23,7 @@ const userManager = {
         });
         return onlineUser;
     },
-    getCurrentUser(socketId){
+    getCurrentUser(socketId) {
         let onlineUser = null;
         global.onlineUsers.some(function (e, i) {
             if (e.socketId === socketId) {
@@ -32,10 +32,10 @@ const userManager = {
         });
         return onlineUser;
     },
-    getRoomByUnionId(unionId){
+    getRoomByUnionId(unionId) {
         for (let i = 0; i < global.rooms.length; i++) {
-            for(let j = 0; j < global.rooms[i].players.length; j++){
-                if(global.rooms[i].players[j].unionId === unionId){
+            for (let j = 0; j < global.rooms[i].players.length; j++) {
+                if (global.rooms[i].players[j].unionId === unionId) {
                     return global.rooms[i];
                     break;
                 }
@@ -57,10 +57,10 @@ const userManager = {
             global.onlineUsers.splice(flag, 1);
         }
 
-        if(unionId){
+        if (unionId) {
             for (let i = 0; i < global.rooms.length; i++) {
-                for(let j = 0; j < global.rooms[i].players.length; j++){
-                    if(global.rooms[i].players[j].unionId === unionId){
+                for (let j = 0; j < global.rooms[i].players.length; j++) {
+                    if (global.rooms[i].players[j].unionId === unionId) {
                         global.rooms[i].players[j].isOnline = 0;
                         socket.in("room" + global.rooms[i].no).emit("notify", {type: "updateRoom"});
                         break;
@@ -124,7 +124,9 @@ const userManager = {
             players: [],
             status: 0,
             round: 1,
-            lastPig: -1
+            lastPig: -1,
+            readyCountdown: 15,
+            showdownCountdown: 8
         };
 
         global.rooms.push(roomInfo);
@@ -147,11 +149,12 @@ const userManager = {
                 let userInfo = userManager.getUserByUnionId(unionId);
                 global.rooms[i].players.push(
                     {
-                        unionId : userInfo.unionId,
-                        nickName : userInfo.nickName,
-                        money : userInfo.money,
-                        status : 0,
-                        isOnline : 1
+                        unionId: userInfo.unionId,
+                        nickName: userInfo.nickName,
+                        money: userInfo.money,
+                        status: 0,
+                        isOnline: 1,
+                        socketId: userInfo.socketId
                     });
                 return true;
             }
@@ -171,6 +174,7 @@ const userManager = {
                     }
                 }
                 if (isOk) {
+                    global.rooms[i].readyCountdown = 15;
                     global.rooms[i].players.splice(slotIndex, 1);
                     this.checkRoomClose(roomNo);
                     return true;
@@ -191,6 +195,19 @@ const userManager = {
             }
         }
     },
+    forceKickOut(onlineUser, room) {
+        if (this.exitRoom(onlineUser.unionId, room.no)) {
+            let socket = global.io.sockets.connected[onlineUser.socketId];
+            if (socket) {
+                socket.emit("notify", {type: "leaveRoom"});
+                socket.leaveAll();
+                socket.join("lobby");
+            }
+
+            global.io.in("lobby").emit("notify", {type: "updateLobby"});
+            global.io.in("room" + room.no).emit("notify", {type: "updateRoom"});
+        }
+    }
 };
 
 export default userManager;
