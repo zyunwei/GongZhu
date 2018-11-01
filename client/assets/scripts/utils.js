@@ -41,4 +41,34 @@ utils.messageBox = function (title, text, callback) {
     });
 };
 
+utils.resultBox = function (results, callback) {
+    let currentScene = cc.director.getScene();
+    if (currentScene == null) {
+        return;
+    }
+    let oldMsgBox = currentScene.getChildByName("resultBox");
+    if (oldMsgBox != null) {
+        let resultBox = oldMsgBox.getComponent("resultBox");
+        resultBox.init(results, callback);
+        return;
+    }
+
+    let resUrl = "prefabs/resultBox";
+    cc.loader.loadRes(resUrl, function (err, prefab) {
+        if (err) {
+            return;
+        }
+        let rstBoxPrefab = cc.instantiate(prefab);
+        let rstBox = rstBoxPrefab.getComponent("resultBox");
+        rstBox.init(results, callback);
+        try {
+            currentScene.addChild(rstBoxPrefab);
+        }
+        catch (err) {
+            rstBoxPrefab.destroy();
+        }
+    });
+};
+
+
 export default utils;

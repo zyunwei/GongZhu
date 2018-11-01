@@ -41,8 +41,8 @@
     },
     "_scale": {
       "__type__": "cc.Vec3",
-      "x": 0.7111111111111111,
-      "y": 0.7111111111111111,
+      "x": 0.7169776240079124,
+      "y": 0.7169776240079124,
       "z": 1
     },
     "_quat": {
@@ -6774,7 +6774,7 @@
         "__id__": 185
       }
     ],
-    "_active": true,
+    "_active": false,
     "_level": 2,
     "_components": [
       {
@@ -7064,7 +7064,7 @@
         "__id__": 192
       }
     ],
-    "_active": true,
+    "_active": false,
     "_level": 2,
     "_components": [
       {
@@ -7368,8 +7368,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 0,
-      "height": 35
+      "width": 500,
+      "height": 40
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -7425,7 +7425,7 @@
     "_N$horizontalAlign": 1,
     "_N$verticalAlign": 1,
     "_N$fontFamily": "Microsoft YaHei",
-    "_N$overflow": 0,
+    "_N$overflow": 2,
     "_id": "86SeQ2qE1Pu5CZ6DtCvJN2"
   },
   {

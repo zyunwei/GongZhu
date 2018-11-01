@@ -627,7 +627,21 @@ cc.Class({
         });
     },
     gameOver(self, data) {
-        utils.messageBox("本轮结束", JSON.stringify(data), function () {
+        let reorderedResult = [];
+
+        for(let result of data){
+            if(result.unionId === global.loginInfo.unionId){
+                reorderedResult.push(result);
+            }
+        }
+
+        for(let result of data){
+            if(result.unionId !== global.loginInfo.unionId){
+                reorderedResult.push(result);
+            }
+        }
+
+        utils.resultBox(reorderedResult, function () {
             self.isInitCards = false;
             self.roomStatus = 0;
             self.myPosition = 0;

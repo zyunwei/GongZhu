@@ -216,10 +216,7 @@ const gameManager = {
     },
     gameOver(game) {
         let gameScore = cardManager.getFinalScore(game);
-        console.log(gameScore);
-
         let moneyChange = cardManager.getMoneyChange(gameScore);
-        console.log(moneyChange);
 
         let gameResult = [];
         let room = this.getRoomByRoomNo(game.roomNo);
@@ -228,7 +225,7 @@ const gameManager = {
                 unionId: room.players[i].unionId,
                 nickName: room.players[i].nickName,
                 score: gameScore[i],
-                moneyChange: moneyChange[i]
+                money: moneyChange[i]
             });
         }
 
