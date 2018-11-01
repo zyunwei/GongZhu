@@ -36,13 +36,13 @@ const gameManager = {
                 isShowdown: 0
             });
 
-            if(room.round <= 1){
+            if (room.round <= 1) {
                 cards[i].some(function (ee, ii) {
                     if (ee.suit === "club" && ee.number === 2) {
                         newGame.firstDealerIndex = i;
                     }
                 });
-            } else{
+            } else {
                 newGame.firstDealerIndex = room.lastPig;
             }
         });
@@ -194,7 +194,7 @@ const gameManager = {
             game.currentTurn.turnPlayer = game.players[game.currentTurn.firstIndex].unionId;
         }
         else {
-            setTimeout(function(){
+            setTimeout(function () {
                 gameManager.gameOver(game);
             }, 1500);
         }
@@ -221,7 +221,17 @@ const gameManager = {
         let moneyChange = cardManager.getMoneyChange(gameScore);
         console.log(moneyChange);
 
+        let gameResult = [];
         let room = this.getRoomByRoomNo(game.roomNo);
+        for (let i = 0; i < room.players.length; i++) {
+            gameResult.push({
+                unionId: room.players[i].unionId,
+                nickName: room.players[i].nickName,
+                score: gameScore[i],
+                moneyChange: moneyChange[i]
+            });
+        }
+
         room.status = 0;
         room.readyCountdown = 15;
         room.showdownCountdown = 15;
@@ -233,7 +243,7 @@ const gameManager = {
 
         global.io.in("room" + game.roomNo).emit("notify", {
             type: "gameOver",
-            data: gameScore
+            data: gameResult
         });
 
         for (let i = global.games.length - 1; i >= 0; i--) {

@@ -530,7 +530,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 50,
+      "width": 540,
       "height": 40
     },
     "_anchorPoint": {
@@ -541,7 +541,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 80,
+      "y": 1,
       "z": 0
     },
     "_scale": {
@@ -584,10 +584,10 @@
     "_N$file": null,
     "_isSystemFontUsed": true,
     "_spacingX": 0,
-    "_N$horizontalAlign": 1,
-    "_N$verticalAlign": 1,
-    "_N$fontFamily": "Arial",
-    "_N$overflow": 0,
+    "_N$horizontalAlign": 0,
+    "_N$verticalAlign": 0,
+    "_N$fontFamily": "Microsoft YaHei",
+    "_N$overflow": 3,
     "_id": ""
   },
   {
@@ -598,12 +598,12 @@
       "__id__": 14
     },
     "_enabled": true,
-    "alignMode": 1,
+    "alignMode": 2,
     "_target": null,
-    "_alignFlags": 40,
+    "_alignFlags": 41,
     "_left": 50,
     "_right": 50,
-    "_top": 0,
+    "_top": 219,
     "_bottom": 0,
     "_verticalCenter": 0,
     "_horizontalCenter": 0,
@@ -613,7 +613,7 @@
     "_isAbsBottom": true,
     "_isAbsHorizontalCenter": true,
     "_isAbsVerticalCenter": true,
-    "_originalWidth": 50,
+    "_originalWidth": 500,
     "_originalHeight": 0,
     "_id": ""
   },
