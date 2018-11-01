@@ -218,6 +218,9 @@ const gameManager = {
         let gameScore = cardManager.getFinalScore(game);
         console.log(gameScore);
 
+        let moneyChange = cardManager.getMoneyChange(gameScore);
+        console.log(moneyChange);
+
         let room = this.getRoomByRoomNo(game.roomNo);
         room.status = 0;
         room.readyCountdown = 15;

@@ -184,7 +184,7 @@ const cardManager = {
 
         // 梅花2
         let room = gameManager.getRoomByRoomNo(game.roomNo);
-        if(room.round <= 1){
+        if (room.round <= 1) {
             for (let card of myCards) {
                 if (card.suit === "club" && card.number === 2) {
                     return card;
@@ -244,7 +244,7 @@ const cardManager = {
 
         // 首轮先出梅花2
         let room = gameManager.getRoomByRoomNo(game.roomNo);
-        if(room.round <= 1) {
+        if (room.round <= 1) {
             let hasClub2 = false;
             for (let card of myCards) {
                 if (card.suit === "club" && card.number === 2) {
@@ -474,7 +474,7 @@ const cardManager = {
                 } else if (game.pointCards[i][j].ex === 'pig') {
                     // 记录下一局先出牌者
                     let room = gameManager.getRoomByRoomNo(game.roomNo);
-                    if(room){
+                    if (room) {
                         room.lastPig = i;
                         room.round += 1;
                     }
@@ -535,6 +535,25 @@ const cardManager = {
         }
 
         return gameScore;
+    },
+    // 由分数计算玩家得到金币
+    getMoneyChange(gameScore) {
+        if (gameScore.length < 2) {
+            return [];
+        }
+
+        let sum = 0;
+        for (let score of gameScore) {
+            sum += score;
+        }
+
+        let moneyChange = [];
+
+        for (let i = 0; i < gameScore.length; i++) {
+            let money = Math.round(gameScore[i] - (sum - gameScore[i]) / (gameScore.length - 1));
+            moneyChange.push(money);
+        }
+        return moneyChange;
     }
 };
 
