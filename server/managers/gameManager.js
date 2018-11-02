@@ -250,8 +250,10 @@ const gameManager = {
 
                         // 更新在线数据
                         let onlineUser = userManager.getUserByUnionId(room.players[i].unionId);
-                        onlineUser.gold = goldAfter;
-                        room.players[i].gold = goldAfter;
+                        if(onlineUser){
+                            onlineUser.gold = goldAfter;
+                            room.players[i].gold = goldAfter;
+                        }
                     });
 
                     commonDal.insertGoldChange({
