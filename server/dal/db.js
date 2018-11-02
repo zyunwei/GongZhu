@@ -11,12 +11,39 @@ const pool = mysql.createPool({
 const db = {};
 db.con = function (callback) {
     pool.getConnection(function (err, connection) {
-        if(err){
+        if (err) {
             callback(err);
-        } else{
+        } else {
             callback(null, connection);
             connection.release();
         }
+    });
+};
+
+db.doQuery = function (sql, params, callback) {
+    this.con(function (err, connection) {
+        if (err) {
+            if (callback) {
+                callback(err);
+            }
+            else {
+                console.log(err);
+            }
+            return;
+        }
+        connection.query(sql, params,
+            function (err, result) {
+                if (err) {
+                    if (callback) {
+                        callback(err);
+                    }
+                    else {
+                        console.log(err);
+                    }
+                    return;
+                }
+                if (callback) callback(null, result);
+            })
     });
 }
 

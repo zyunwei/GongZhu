@@ -1021,7 +1021,7 @@
     "lblNickname": {
       "__id__": 10
     },
-    "lblMoney": {
+    "lblGold": {
       "__id__": 13
     },
     "lblCountDown": {
@@ -1030,6 +1030,8 @@
     "jsq": {
       "__id__": 23
     },
+    "unionId": "",
+    "countdownNumber": -1,
     "_id": ""
   },
   {

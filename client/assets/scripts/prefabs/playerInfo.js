@@ -3,7 +3,7 @@ cc.Class({
 
     properties: {
         lblNickname: cc.Label,
-        lblMoney: cc.Label,
+        lblGold: cc.Label,
         lblCountDown: cc.Label,
         jsq: cc.Node,
         unionId: "",
@@ -18,9 +18,9 @@ cc.Class({
             }
         }, 1);
     },
-    init(nickname, money, unionId) {
+    init(nickname, gold, unionId) {
         this.lblNickname.string = nickname;
-        this.lblMoney.string = money;
+        this.lblGold.string = gold;
         this.unionId = unionId;
         this.setReadyStatus(false);
     },

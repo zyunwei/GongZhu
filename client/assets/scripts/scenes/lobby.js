@@ -5,7 +5,7 @@ cc.Class({
     extends: cc.Component,
     properties: {
         nickname: cc.Label,
-        money: cc.Label,
+        gold: cc.Label,
         roomCount: cc.Label,
         onlineCount: cc.Label,
         currentPage: 1,
@@ -66,7 +66,7 @@ cc.Class({
             if (result.success === "1") {
                 global.loginInfo = result.data.loginInfo;
                 self.nickname.string = global.loginInfo.nickName;
-                self.money.string = global.loginInfo.money;
+                self.gold.string = global.loginInfo.gold;
                 self.roomCount.string = "房间数：" + result.data.roomCount;
                 self.onlineCount.string = "在线人数：" + result.data.onlineCount;
                 self.roomCountNumber = result.data.roomCount;

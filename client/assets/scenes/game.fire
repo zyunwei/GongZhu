@@ -41,8 +41,8 @@
     },
     "_scale": {
       "__type__": "cc.Vec3",
-      "x": 0.7169776240079124,
-      "y": 0.7169776240079124,
+      "x": 1.249113042855816,
+      "y": 1.249113042855816,
       "z": 1
     },
     "_quat": {
@@ -1644,7 +1644,7 @@
     "lblNickname": {
       "__id__": 23
     },
-    "lblMoney": {
+    "lblGold": {
       "__id__": 26
     },
     "lblCountDown": {
@@ -2711,7 +2711,7 @@
     "lblNickname": {
       "__id__": 54
     },
-    "lblMoney": {
+    "lblGold": {
       "__id__": 57
     },
     "lblCountDown": {
@@ -3778,7 +3778,7 @@
     "lblNickname": {
       "__id__": 85
     },
-    "lblMoney": {
+    "lblGold": {
       "__id__": 88
     },
     "lblCountDown": {
@@ -4845,7 +4845,7 @@
     "lblNickname": {
       "__id__": 116
     },
-    "lblMoney": {
+    "lblGold": {
       "__id__": 119
     },
     "lblCountDown": {

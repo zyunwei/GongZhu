@@ -1,5 +1,8 @@
 import global from "../global";
 import cardManager from './cardManager'
+import userDal from "../dal/userDal";
+import commonDal from "../dal/commonDal";
+import userManager from "./userManager";
 
 const gameManager = {
     getClientTurnInfo(game) {
@@ -21,7 +24,9 @@ const gameManager = {
             showdownCards: [[], [], [], []],
             pointCards: [[], [], [], []],
             playedCards: [],
-            suitPlayStatus: {spade: 0, heart: 0, diamond: 0, club: 0}
+            suitPlayStatus: {spade: 0, heart: 0, diamond: 0, club: 0},
+            startTime: new Date(),
+            endTime: null
         };
 
         let cards = cardManager.getAllCard();
@@ -215,40 +220,89 @@ const gameManager = {
         }
     },
     gameOver(game) {
+        game.endTime = new Date();
+
         let gameScore = cardManager.getFinalScore(game);
-        let moneyChange = cardManager.getMoneyChange(gameScore);
+        let goldChange = cardManager.getGoldChange(gameScore);
 
         let gameResult = [];
         let room = this.getRoomByRoomNo(game.roomNo);
+        if (!room) return;
+
         for (let i = 0; i < room.players.length; i++) {
             gameResult.push({
                 unionId: room.players[i].unionId,
                 nickName: room.players[i].nickName,
                 score: gameScore[i],
-                money: moneyChange[i]
+                gold: goldChange[i]
             });
-        }
 
-        room.status = 0;
-        room.readyCountdown = 15;
-        room.showdownCountdown = 15;
-        room.gameId = '';
+            userDal.getUserById(room.players[i].unionId, function (err, user) {
+                if (!err) {
+                    let goldBefore = user[0].gold;
+                    let goldAfter = goldBefore + goldChange[i];
 
-        for (let player of room.players) {
-            player.status = 0;
-        }
+                    userDal.updateGold(room.players[i].unionId, goldChange[i], function (err, result) {
+                        if (err) {
+                            global.logger.error(err);
+                            console.log("更新玩家金币失败");
+                        }
 
-        global.io.in("room" + game.roomNo).emit("notify", {
-            type: "gameOver",
-            data: gameResult
-        });
+                        // 更新在线数据
+                        let onlineUser = userManager.getUserByUnionId(room.players[i].unionId);
+                        onlineUser.gold = goldAfter;
+                        room.players[i].gold = goldAfter;
+                    });
 
-        for (let i = global.games.length - 1; i >= 0; i--) {
-            if (game.gameId === global.games[i].gameId) {
-                global.games.splice(i, 1);
+                    commonDal.insertGoldChange({
+                        unionId: user[0].unionId,
+                        goldBefore: goldBefore,
+                        changeAmount: goldChange[i],
+                        goldAfter: goldAfter,
+                        changeType: "游戏输赢",
+                        relNo: game.gameId,
+                        remark: goldChange[i] > 0 ? "赢" : "输",
+                        actionUser: "system",
+                    });
+
+                    commonDal.insertGameResult({
+                        gameId: game.gameId,
+                        roomNo: game.roomNo,
+                        roundNo: room.round,
+                        position: i,
+                        unionId: room.players[i].unionId,
+                        nickName: room.players[i].nickName,
+                        score: gameScore[i],
+                        goldChange: goldChange[i],
+                        pointCards: cardManager.getSimpleDesc(game.pointCards[i]),
+                        showdownCards: cardManager.getSimpleDesc(game.showdownCards[i]),
+                        startTime: game.startTime,
+                        endTime: game.endTime
+                    });
+                }
+            });
+
+            room.status = 0;
+            room.readyCountdown = 15;
+            room.showdownCountdown = 15;
+            room.gameId = '';
+
+            for (let player of room.players) {
+                player.status = 0;
+            }
+
+            global.io.in("room" + game.roomNo).emit("notify", {
+                type: "gameOver",
+                data: gameResult
+            });
+
+            for (let i = global.games.length - 1; i >= 0; i--) {
+                if (game.gameId === global.games[i].gameId) {
+                    global.games.splice(i, 1);
+                }
             }
         }
     }
-};
+}
 
 export default gameManager;

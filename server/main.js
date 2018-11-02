@@ -79,7 +79,7 @@ global.io.on('connection', function (socket) {
                 let onlineUser = {
                     unionId: result.unionId,
                     nickName: result.nickName,
-                    money: 50000,
+                    gold: result.gold,
                     socketId: socket.id
                 };
                 if (!userManager.checkOnlineUser(onlineUser)) {
@@ -103,6 +103,7 @@ global.io.on('connection', function (socket) {
         };
 
         let onlineUser = userManager.getCurrentUser(socket.id);
+
         if (onlineUser != null) {
             result.success = "1";
             result.message = "";
@@ -250,7 +251,7 @@ global.io.on('connection', function (socket) {
                 userList.push({
                     unionId: user.unionId,
                     isOnline: user.isOnline,
-                    money: user.money,
+                    gold: user.gold,
                     nickName: user.nickName,
                     status: user.status
                 });

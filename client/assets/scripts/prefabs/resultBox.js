@@ -13,7 +13,7 @@ cc.Class({
                 this.PlayerName[i].string = results[i].nickName;
             }
             if(this.Score[i]){
-                this.Score[i].string = results[i].money > 0 ? "+" + results[i].money : results[i].money;
+                this.Score[i].string = results[i].gold > 0 ? "+" + results[i].gold : results[i].gold;
             }
         }
     },

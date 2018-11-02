@@ -79,6 +79,7 @@ const userManager = {
             }
             let logInfo = userInfo.nickName + '[' + userInfo.unionId + ']';
             if (result && result.length === 0) {
+                userInfo.gold = global.initGold;
                 userDal.insertUser(userInfo, function (err, result) {
                     if (err) {
                         global.logger.error(err);
@@ -90,15 +91,22 @@ const userManager = {
                     }
                 });
             } else {
-                console.log("老用户 " + logInfo + " 登录");
+                console.log("用户 " + logInfo + " 登录");
                 userDal.updateUser(userInfo, function (err, result) {
                     if (err) {
                         global.logger.error(err);
                         console.log("更新用户数据失败");
                     }
-                });
 
-                callback(null, userInfo);
+                    userDal.getUserById(userInfo.unionId, function (err, user) {
+                        if (err) {
+                            global.logger.error(err);
+                            console.log("获取用户数据失败");
+                        }
+
+                        callback(null, user[0]);
+                    });
+                });
             }
         });
     },
@@ -151,7 +159,7 @@ const userManager = {
                     {
                         unionId: userInfo.unionId,
                         nickName: userInfo.nickName,
-                        money: userInfo.money,
+                        gold: userInfo.gold,
                         status: 0,
                         isOnline: 1,
                         socketId: userInfo.socketId

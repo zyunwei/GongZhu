@@ -174,7 +174,7 @@ cc.Class({
                             e.nickName = e.nickName + "(断线)";
                         }
 
-                        playerInfo.init(e.nickName, e.money, e.unionId);
+                        playerInfo.init(e.nickName, e.gold, e.unionId);
 
                         playerInfo.setReadyStatus(result.data.status === 0 && e.status === 1);
 

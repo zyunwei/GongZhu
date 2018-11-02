@@ -531,7 +531,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 540,
-      "height": 260
+      "height": 250
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -541,7 +541,7 @@
     "_position": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -4,
+      "y": -16,
       "z": 0
     },
     "_scale": {
@@ -584,7 +584,7 @@
     "_N$file": null,
     "_isSystemFontUsed": true,
     "_spacingX": 0,
-    "_N$horizontalAlign": 0,
+    "_N$horizontalAlign": 1,
     "_N$verticalAlign": 0,
     "_N$fontFamily": "Microsoft YaHei",
     "_N$overflow": 2,
@@ -603,7 +603,7 @@
     "_alignFlags": 41,
     "_left": 50,
     "_right": 50,
-    "_top": 114,
+    "_top": 131,
     "_bottom": 0,
     "_verticalCenter": 0,
     "_horizontalCenter": 0,

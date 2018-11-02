@@ -15,8 +15,6 @@ global.testUserInfo1 ={
     province: 'hebei',
     country: 'china',
     avatarUrl: 'https://www.google.com',
-    updateTime: '',
-    updateIp: ''
 };
 
 global.testUserInfo2 ={
@@ -27,8 +25,6 @@ global.testUserInfo2 ={
     province: 'shanxi',
     country: 'china',
     avatarUrl: 'https://www.google.com',
-    updateTime: '',
-    updateIp: ''
 };
 
 global.testUserInfo3 ={
@@ -51,8 +47,6 @@ global.testUserInfo4 ={
     province: 'hunan',
     country: 'china',
     avatarUrl: 'https://www.google.com',
-    updateTime: '',
-    updateIp: ''
 };
 
 global.testUserInfo5 ={
@@ -63,8 +57,6 @@ global.testUserInfo5 ={
     province: 'hainan',
     country: 'china',
     avatarUrl: 'https://www.google.com',
-    updateTime: '',
-    updateIp: ''
 };
 
 

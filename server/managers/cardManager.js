@@ -537,7 +537,7 @@ const cardManager = {
         return gameScore;
     },
     // 由分数计算玩家得到金币
-    getMoneyChange(gameScore) {
+    getGoldChange(gameScore) {
         if (gameScore.length < 2) {
             return [];
         }
@@ -547,13 +547,53 @@ const cardManager = {
             sum += score;
         }
 
-        let moneyChange = [];
+        let goldChange = [];
 
         for (let i = 0; i < gameScore.length; i++) {
-            let money = Math.round(gameScore[i] - (sum - gameScore[i]) / (gameScore.length - 1));
-            moneyChange.push(money);
+            let gold = Math.round(gameScore[i] - (sum - gameScore[i]) / (gameScore.length - 1));
+            goldChange.push(gold);
         }
-        return moneyChange;
+        return goldChange;
+    },
+    // 牌型描述，用于数据库记录
+    getSimpleDesc(cards) {
+        let str = "";
+        for (let card of cards) {
+            let s = "";
+            switch (card.suit) {
+                case "spade":
+                    s = "S";
+                    break;
+                case "heart":
+                    s = "H";
+                    break;
+                case "club":
+                    s = "C";
+                    break;
+                case "diamond":
+                    s = "D";
+                    break;
+                default:
+                    s = card.suit;
+            }
+
+            let n = "";
+            if (card.number === 1) {
+                n = "A";
+            } else if (card.number >= 2 & card.number <= 10) {
+                n = card.number;
+            } else if (card.number === 11) {
+                n = "J";
+            } else if (card.number === 12) {
+                n = "Q";
+            } else if (card.number === 13) {
+                n = "K";
+            }
+
+            str += s + n + " ";
+        }
+
+        return str;
     }
 };
 
