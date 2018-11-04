@@ -476,7 +476,6 @@ const cardManager = {
                     let room = gameManager.getRoomByRoomNo(game.roomNo);
                     if (room) {
                         room.lastPig = i;
-                        room.round += 1;
                     }
 
                     // 全收

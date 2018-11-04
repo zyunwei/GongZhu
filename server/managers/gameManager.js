@@ -229,6 +229,8 @@ const gameManager = {
         let room = this.getRoomByRoomNo(game.roomNo);
         if (!room) return;
 
+        let roundNo = room.round;
+
         for (let i = 0; i < room.players.length; i++) {
             gameResult.push({
                 unionId: room.players[i].unionId,
@@ -270,7 +272,7 @@ const gameManager = {
                     commonDal.insertGameResult({
                         gameId: game.gameId,
                         roomNo: game.roomNo,
-                        roundNo: room.round,
+                        roundNo: roundNo,
                         position: i,
                         unionId: room.players[i].unionId,
                         nickName: room.players[i].nickName,
@@ -283,25 +285,26 @@ const gameManager = {
                     });
                 }
             });
+        }
 
-            room.status = 0;
-            room.readyCountdown = 15;
-            room.showdownCountdown = 15;
-            room.gameId = '';
+        room.status = 0;
+        room.readyCountdown = 15;
+        room.showdownCountdown = 15;
+        room.gameId = '';
+        room.round += 1;
 
-            for (let player of room.players) {
-                player.status = 0;
-            }
+        for (let player of room.players) {
+            player.status = 0;
+        }
 
-            global.io.in("room" + game.roomNo).emit("notify", {
-                type: "gameOver",
-                data: gameResult
-            });
+        global.io.in("room" + game.roomNo).emit("notify", {
+            type: "gameOver",
+            data: gameResult
+        });
 
-            for (let i = global.games.length - 1; i >= 0; i--) {
-                if (game.gameId === global.games[i].gameId) {
-                    global.games.splice(i, 1);
-                }
+        for (let i = global.games.length - 1; i >= 0; i--) {
+            if (game.gameId === global.games[i].gameId) {
+                global.games.splice(i, 1);
             }
         }
     }
