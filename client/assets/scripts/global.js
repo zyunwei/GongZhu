@@ -1,4 +1,4 @@
-import net from 'net.js'
+import net from './net'
 
 const global = {};
 global.net = net();

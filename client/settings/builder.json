@@ -7,7 +7,7 @@
   "includeAnySDK": false,
   "includeSDKBox": false,
   "inlineSpriteFrames": true,
-  "inlineSpriteFrames_native": true,
+  "inlineSpriteFrames_native": false,
   "jailbreakPlatform": false,
   "md5Cache": false,
   "mergeStartScene": false,
@@ -25,12 +25,12 @@
     "REMOTE_SERVER_ROOT": "",
     "orientation": "portrait"
   },
-  "startScene": "0b023140-4670-4a7b-bdb8-510da3d7379c",
-  "title": "client",
+  "startScene": "79001d78-e972-4fce-bac0-782cf4793a6e",
+  "title": "HappyGongZhu",
   "webOrientation": "auto",
   "wechatgame": {
     "REMOTE_SERVER_ROOT": "",
-    "appid": "wx8269b06240249c24",
+    "appid": "wx87a9abfd86215c9d",
     "isSubdomain": false,
     "orientation": "landscape",
     "subContext": ""
