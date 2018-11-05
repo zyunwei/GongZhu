@@ -134,7 +134,7 @@ const userManager = {
             round: 1,
             lastPig: -1,
             readyCountdown: 15,
-            showdownCountdown: 8
+            exposeCountdown: 8
         };
 
         global.rooms.push(roomInfo);

@@ -12,8 +12,8 @@ const gameManager = {
             playedCards: game.playedCards
         }
     },
-    startShowdown(room) {
-        room.showdownCountdown = 15;
+    startExpose(room) {
+        room.exposeCountdown = 15;
 
         let newGame = {
             gameId: new Date().getTime(),
@@ -21,7 +21,7 @@ const gameManager = {
             players: [],
             turn: 0,
             firstDealerIndex: 0,
-            showdownCards: [[], [], [], []],
+            exposeCards: [[], [], [], []],
             pointCards: [[], [], [], []],
             playedCards: [],
             suitPlayStatus: {spade: 0, heart: 0, diamond: 0, club: 0},
@@ -38,7 +38,7 @@ const gameManager = {
             newGame.players.push({
                 unionId: e.unionId,
                 cards: cards[i],
-                isShowdown: 0
+                isExpose: 0
             });
 
             if (room.round <= 1) {
@@ -112,32 +112,32 @@ const gameManager = {
         return [];
     },
     // 亮牌
-    showdown(game, unionId, selectedCard) {
-        let showdownFinishCount = 0;
+    expose(game, unionId, selectedCard) {
+        let exposeFinishCount = 0;
 
         for (let i = 0; i < game.players.length; i++) {
             if (game.players[i].unionId === unionId) {
                 for (let card of selectedCard) {
-                    game.showdownCards[i].push(card);
+                    game.exposeCards[i].push(card);
                 }
 
-                game.players[i].isShowdown = 1;
+                game.players[i].isExpose = 1;
             }
 
-            if (game.players[i].isShowdown === 1) {
-                showdownFinishCount += 1;
+            if (game.players[i].isExpose === 1) {
+                exposeFinishCount += 1;
             }
         }
 
-        let showdowns = cardManager.getShowdownInfo(game);
+        let exposes = cardManager.getExposeInfo(game);
 
-        if (showdownFinishCount >= 4) {
-            cardManager.checkShowdown(game);
+        if (exposeFinishCount >= 4) {
+            cardManager.checkExpose(game);
         }
 
-        global.io.in("room" + game.roomNo).emit("notify", {type: "updateShowdown", data: showdowns});
+        global.io.in("room" + game.roomNo).emit("notify", {type: "updateExpose", data: exposes});
 
-        if (showdownFinishCount >= 4) {
+        if (exposeFinishCount >= 4) {
             this.startGame(this.getRoomByRoomNo(game.roomNo));
         }
 
@@ -231,6 +231,13 @@ const gameManager = {
 
         let roundNo = room.round;
 
+        let exposeCards = [];
+        for (let expose of game.exposeCards) {
+            for (let card of expose) {
+                exposeCards.push(card);
+            }
+        }
+
         for (let i = 0; i < room.players.length; i++) {
             gameResult.push({
                 unionId: room.players[i].unionId,
@@ -279,7 +286,7 @@ const gameManager = {
                         score: gameScore[i],
                         goldChange: goldChange[i],
                         pointCards: cardManager.getSimpleDesc(game.pointCards[i]),
-                        showdownCards: cardManager.getSimpleDesc(game.showdownCards[i]),
+                        exposeCards: cardManager.getSimpleDesc(exposeCards),
                         startTime: game.startTime,
                         endTime: game.endTime
                     });
@@ -289,7 +296,7 @@ const gameManager = {
 
         room.status = 0;
         room.readyCountdown = 15;
-        room.showdownCountdown = 15;
+        room.exposeCountdown = 15;
         room.gameId = '';
         room.round += 1;
 

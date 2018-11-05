@@ -17,7 +17,7 @@ cc.Class({
             default: null,
             type: cc.Prefab
         },
-        noShowdownMark: {
+        noExposeMark: {
             default: null,
             type: cc.Prefab
         },
@@ -39,13 +39,13 @@ cc.Class({
             type: cc.Label
         },
         readyCountdown: 0,
-        showdownCountdown: 0,
+        exposeCountdown: 0,
     },
     onLoad() {
         this.localPointCards = [[], [], [], []];
         this.node.getChildByName("btnPlayCard").active = false;
-        this.node.getChildByName("btnShowdown").active = false;
-        this.node.getChildByName("btnDoNotShowdown").active = false;
+        this.node.getChildByName("btnExpose").active = false;
+        this.node.getChildByName("btnDoNotExpose").active = false;
         this.lblCenterCountdown.active = false;
     },
     start() {
@@ -62,17 +62,18 @@ cc.Class({
         this.schedule(function () {
             let lastUpdate = null;
             let lastTurnInfo = null;
-            let lastShowdownInfo = null;
+            let lastExposeInfo = null;
             let lastGameOverInfo = null;
             while (global.notifyQueue.length > 0) {
                 let notify = global.notifyQueue.shift();
                 if (notify) {
+                    console.log(notify);
                     switch (notify.type) {
                         case "updateRoom":
                             lastUpdate = 1;
                             break;
-                        case "updateShowdown":
-                            lastShowdownInfo = notify.data;
+                        case "updateExpose":
+                            lastExposeInfo = notify.data;
                             break;
                         case "updateTurn":
                             lastTurnInfo = notify.data;
@@ -90,8 +91,8 @@ cc.Class({
                 this.updateRoom();
             }
 
-            if (lastShowdownInfo != null) {
-                this.updateShowdown(self, lastShowdownInfo);
+            if (lastExposeInfo != null) {
+                this.updateExpose(self, lastExposeInfo);
             }
 
             if (lastTurnInfo != null) {
@@ -141,10 +142,10 @@ cc.Class({
             this.lblCenterCountdown.active = false;
         }
     },
-    showShowdownCountdown() {
-        this.lblCenterCountdown.string = "请亮牌.. " + this.showdownCountdown;
-        this.showdownCountdown -= 1;
-        if (this.showdownCountdown < 0) {
+    showExposeCountdown() {
+        this.lblCenterCountdown.string = "请亮牌.. " + this.exposeCountdown;
+        this.exposeCountdown -= 1;
+        if (this.exposeCountdown < 0) {
             this.lblCenterCountdown.string = "";
             this.lblCenterCountdown.active = false;
         }
@@ -213,11 +214,11 @@ cc.Class({
                 }
 
                 if (self.roomStatus === 1) {
-                    self.showdownCountdown = result.data.showdownCountdown;
+                    self.exposeCountdown = result.data.exposeCountdown;
                     self.lblCenterCountdown.active = true;
-                    self.schedule(self.showShowdownCountdown, 1, self.showdownCountdown, 0.01);
+                    self.schedule(self.showExposeCountdown, 1, self.exposeCountdown, 0.01);
                 } else {
-                    self.unschedule(self.showShowdownCountdown);
+                    self.unschedule(self.showExposeCountdown);
                     self.lblCenterCountdown.string = "";
                     self.lblCenterCountdown.active = false;
                 }
@@ -240,22 +241,22 @@ cc.Class({
             self.isInitCards = true;
         }
 
-        self.initShowdown(self);
+        self.initExpose(self);
 
         if (self.roomStatus === 2) {
             self.initTurn(self);
         }
     },
-    updateShowdown: function (self, showdowns) {
+    updateExpose: function (self, exposes) {
         // 亮牌操作按钮相关
         let myCards = self.node.getChildByName("myCards");
-        for (let showdown of showdowns) {
-            if (showdown.unionId === global.loginInfo.unionId) {
-                if (showdown.isShowdown !== 1) {
-                    self.node.getChildByName("btnShowdown").active = true;
-                    self.node.getChildByName("btnDoNotShowdown").active = true;
+        for (let expose of exposes) {
+            if (expose.unionId === global.loginInfo.unionId) {
+                if (expose.isExpose !== 1) {
+                    self.node.getChildByName("btnExpose").active = true;
+                    self.node.getChildByName("btnDoNotExpose").active = true;
                     self.node.getChildByName("btnPlayCard").active = false;
-                    let hasShowdown = false;
+                    let hasExpose = false;
                     for (let i = 0; i < myCards.children.length; i++) {
                         let pokerCard = myCards.children[i].getComponent("pokerCard");
                         pokerCard.setDisableMask(true);
@@ -264,19 +265,19 @@ cc.Class({
                             pokerCard.suit === 'spade' && pokerCard.number === 12 ||
                             pokerCard.suit === 'diamond' && pokerCard.number === 11 ||
                             pokerCard.suit === 'club' && pokerCard.number === 10) {
-                            hasShowdown = true;
+                            hasExpose = true;
                             pokerCard.canTouch = true;
                             pokerCard.setDisableMask(false);
                         }
                     }
 
-                    if (!hasShowdown) {
-                        self.node.getChildByName("btnShowdown").active = false;
+                    if (!hasExpose) {
+                        self.node.getChildByName("btnExpose").active = false;
                     }
                 } else {
-                    self.node.getChildByName("btnShowdown").active = false;
-                    self.node.getChildByName("btnDoNotShowdown").active = false;
-                    self.unschedule(self.showShowdownCountdown);
+                    self.node.getChildByName("btnExpose").active = false;
+                    self.node.getChildByName("btnDoNotExpose").active = false;
+                    self.unschedule(self.showExposeCountdown);
                     self.lblCenterCountdown.string = "";
                     self.lblCenterCountdown.active = false;
                     for (let i = myCards.children.length - 1; i >= 0; i--) {
@@ -289,39 +290,39 @@ cc.Class({
         }
 
         // 亮牌显示
-        for (let i = 0; i < showdowns.length; i++) {
+        for (let i = 0; i < exposes.length; i++) {
             let showIndex = i - self.myPosition;
             if (showIndex < 0) showIndex += 4;
 
-            let showdownBox = null;
+            let exposeBox = null;
             switch (showIndex) {
                 case 0:
-                    showdownBox = self.node.getChildByName("showdownSouth");
+                    exposeBox = self.node.getChildByName("exposeSouth");
                     break;
                 case 1:
-                    showdownBox = self.node.getChildByName("showdownEast");
+                    exposeBox = self.node.getChildByName("exposeEast");
                     break;
                 case 2:
-                    showdownBox = self.node.getChildByName("showdownNorth");
+                    exposeBox = self.node.getChildByName("exposeNorth");
                     break;
                 case 3:
-                    showdownBox = self.node.getChildByName("showdownWest");
+                    exposeBox = self.node.getChildByName("exposeWest");
                     break;
             }
 
-            if (showdownBox != null) {
-                showdownBox.destroyAllChildren();
-                if (showdowns[i].showdownCards && showdowns[i].showdownCards.length > 0) {
-                    for (let j = 0; j < showdowns[i].showdownCards.length; j++) {
+            if (exposeBox != null) {
+                exposeBox.destroyAllChildren();
+                if (exposes[i].exposeCards && exposes[i].exposeCards.length > 0) {
+                    for (let j = 0; j < exposes[i].exposeCards.length; j++) {
                         let showCard = cc.instantiate(self.smallPokerDemo);
                         let pokerScript = showCard.getComponent("pokerCard");
-                        pokerScript.init(showdowns[i].showdownCards[j].suit, showdowns[i].showdownCards[j].number);
-                        showCard.parent = showdownBox;
+                        pokerScript.init(exposes[i].exposeCards[j].suit, exposes[i].exposeCards[j].number);
+                        showCard.parent = exposeBox;
                     }
                 }
-                else if (showdowns[i].isShowdown === 1) {
-                    let noShowdownMark = cc.instantiate(self.noShowdownMark);
-                    noShowdownMark.parent = showdownBox;
+                else if (exposes[i].isExpose === 1) {
+                    let noExposeMark = cc.instantiate(self.noExposeMark);
+                    noExposeMark.parent = exposeBox;
                 }
             }
         }
@@ -344,10 +345,10 @@ cc.Class({
             }
         });
     },
-    initShowdown(self) {
-        global.net.getShowdownInfo(global.roomNo, function (result) {
+    initExpose(self) {
+        global.net.getExposeInfo(global.roomNo, function (result) {
             if (result.success === "1") {
-                self.updateShowdown(self, result.data)
+                self.updateExpose(self, result.data)
             } else {
                 utils.messageBox("更新亮牌信息失败", result.message);
             }
@@ -574,7 +575,7 @@ cc.Class({
             }
         });
     },
-    showdownClick(event, data) {
+    exposeClick(event, data) {
         let self = this;
         let myCards = self.node.getChildByName("myCards");
         let selectedCard = [];
@@ -591,15 +592,15 @@ cc.Class({
             return;
         }
 
-        global.net.showdown(selectedCard, function (result) {
+        global.net.expose(selectedCard, function (result) {
             if (result.success === "1") {
                 for (let i = myCards.children.length - 1; i >= 0; i--) {
                     let pokerCard = myCards.children[i].getComponent("pokerCard");
                     pokerCard.setDefault();
                 }
-                self.node.getChildByName("btnShowdown").active = false;
-                self.node.getChildByName("btnDoNotShowdown").active = false;
-                self.unschedule(self.showShowdownCountdown);
+                self.node.getChildByName("btnExpose").active = false;
+                self.node.getChildByName("btnDoNotExpose").active = false;
+                self.unschedule(self.showExposeCountdown);
                 self.lblCenterCountdown.string = "";
                 self.lblCenterCountdown.active = false;
             } else {
@@ -607,18 +608,18 @@ cc.Class({
             }
         });
     },
-    notShowdownClick(event, data) {
+    notExposeClick(event, data) {
         let self = this;
         let myCards = self.node.getChildByName("myCards");
-        global.net.showdown([], function (result) {
+        global.net.expose([], function (result) {
             if (result.success === "1") {
                 for (let i = myCards.children.length - 1; i >= 0; i--) {
                     let pokerCard = myCards.children[i].getComponent("pokerCard");
                     pokerCard.setDefault();
                 }
-                self.node.getChildByName("btnShowdown").active = false;
-                self.node.getChildByName("btnDoNotShowdown").active = false;
-                self.unschedule(self.showShowdownCountdown);
+                self.node.getChildByName("btnExpose").active = false;
+                self.node.getChildByName("btnDoNotExpose").active = false;
+                self.unschedule(self.showExposeCountdown);
                 self.lblCenterCountdown.string = "";
                 self.lblCenterCountdown.active = false;
             } else {
@@ -647,10 +648,10 @@ cc.Class({
             self.myPosition = 0;
             self.localTurnCards = [];
             self.localPointCards = [];
-            self.node.getChildByName("showdownSouth").destroyAllChildren();
-            self.node.getChildByName("showdownEast").destroyAllChildren();
-            self.node.getChildByName("showdownNorth").destroyAllChildren();
-            self.node.getChildByName("showdownWest").destroyAllChildren();
+            self.node.getChildByName("exposeSouth").destroyAllChildren();
+            self.node.getChildByName("exposeEast").destroyAllChildren();
+            self.node.getChildByName("exposeNorth").destroyAllChildren();
+            self.node.getChildByName("exposeWest").destroyAllChildren();
 
             self.node.getChildByName("pointCardsSouth").destroyAllChildren();
             self.node.getChildByName("pointCardsEast").destroyAllChildren();

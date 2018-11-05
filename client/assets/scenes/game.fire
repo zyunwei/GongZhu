@@ -41,8 +41,8 @@
     },
     "_scale": {
       "__type__": "cc.Vec3",
-      "x": 1.249113042855816,
-      "y": 1.249113042855816,
+      "x": 0.7583333333333333,
+      "y": 0.7583333333333333,
       "z": 1
     },
     "_quat": {
@@ -6272,7 +6272,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "showdownWest",
+    "_name": "exposeWest",
     "_objFlags": 0,
     "_parent": {
       "__id__": 2
@@ -6395,7 +6395,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "showdownEast",
+    "_name": "exposeEast",
     "_objFlags": 0,
     "_parent": {
       "__id__": 2
@@ -6518,7 +6518,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "showdownNorth",
+    "_name": "exposeNorth",
     "_objFlags": 0,
     "_parent": {
       "__id__": 2
@@ -6641,7 +6641,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "showdownSouth",
+    "_name": "exposeSouth",
     "_objFlags": 0,
     "_parent": {
       "__id__": 2
@@ -6764,7 +6764,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "btnShowdown",
+    "_name": "btnExpose",
     "_objFlags": 0,
     "_parent": {
       "__id__": 2
@@ -7022,7 +7022,7 @@
       "__id__": 2
     },
     "component": "game",
-    "handler": "showdownClick",
+    "handler": "exposeClick",
     "customEventData": ""
   },
   {
@@ -7054,7 +7054,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "btnDoNotShowdown",
+    "_name": "btnDoNotExpose",
     "_objFlags": 0,
     "_parent": {
       "__id__": 2
@@ -7312,7 +7312,7 @@
       "__id__": 2
     },
     "component": "game",
-    "handler": "notShowdownClick",
+    "handler": "notExposeClick",
     "customEventData": ""
   },
   {
@@ -7473,7 +7473,7 @@
     "smallPokerDemo": {
       "__uuid__": "0bed3d75-960e-452c-8574-caeb5ca8296a"
     },
-    "noShowdownMark": {
+    "noExposeMark": {
       "__uuid__": "17f999f2-dcfb-4441-850f-3615cfae41d5"
     },
     "isInitCards": false,
@@ -7491,7 +7491,7 @@
       "__id__": 199
     },
     "readyCountdown": 0,
-    "showdownCountdown": 0,
+    "exposeCountdown": 0,
     "_id": "028QiMs4lO6bR9yuEqsDbX"
   }
 ]

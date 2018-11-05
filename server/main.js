@@ -36,20 +36,20 @@ setInterval(function () {
 
         if (room.status === 1) {
             // 亮牌倒计时
-            let forceShowdown = [];
-            if (room.showdownCountdown > 0) {
-                room.showdownCountdown -= 1;
+            let forceExpose = [];
+            if (room.exposeCountdown > 0) {
+                room.exposeCountdown -= 1;
             }
             else {
                 for (let player of game.players) {
-                    if (player.isShowdown !== 1) {
-                        forceShowdown.push(player);
+                    if (player.isExpose !== 1) {
+                        forceExpose.push(player);
                     }
                 }
             }
-            for (let player of forceShowdown) {
+            for (let player of forceExpose) {
                 // 超时默认不亮牌
-                gameManager.showdown(game, player.unionId, []);
+                gameManager.expose(game, player.unionId, []);
             }
         }
 
@@ -237,14 +237,14 @@ global.io.on('connection', function (socket) {
         let status = null;
         let round = 0;
         let readyCountdown = 0;
-        let showdownCountdown = 0;
+        let exposeCountdown = 0;
 
         for (let i = 0; i < global.rooms.length; i++) {
             if (global.rooms[i].no !== roomNo) continue;
             status = global.rooms[i].status;
             round = global.rooms[i].round;
             readyCountdown = global.rooms[i].readyCountdown;
-            showdownCountdown = global.rooms[i].showdownCountdown;
+            exposeCountdown = global.rooms[i].exposeCountdown;
 
             for (let j = 0; j < global.rooms[i].players.length; j++) {
                 let user = global.rooms[i].players[j];
@@ -262,7 +262,7 @@ global.io.on('connection', function (socket) {
         if (userList.length > 0) {
             result.success = "1";
             result.message = "";
-            result.data = {status, userList, roomNo, round, readyCountdown, showdownCountdown};
+            result.data = {status, userList, roomNo, round, readyCountdown, exposeCountdown};
         }
 
         response(result);
@@ -285,7 +285,7 @@ global.io.on('connection', function (socket) {
 
                         // 全部准备 开始亮牌
                         if (readyCount >= 4) {
-                            gameManager.startShowdown(global.rooms[i]);
+                            gameManager.startExpose(global.rooms[i]);
                         }
 
                         global.io.in("room" + global.rooms[i].no).emit("notify", {type: "updateRoom"});
@@ -316,7 +316,7 @@ global.io.on('connection', function (socket) {
         response({success: "1", message: "", data: cards});
     });
 
-    socket.on('getShowdownInfo', function (roomNo, response) {
+    socket.on('getExposeInfo', function (roomNo, response) {
         let onlineUser = userManager.getCurrentUser(socket.id);
         if (!onlineUser) {
             response({success: "0", message: "账号异常，请稍后再试"});
@@ -325,7 +325,7 @@ global.io.on('connection', function (socket) {
 
         let game = gameManager.getGameByRoomNo(roomNo);
         if (game) {
-            response({success: "1", message: "", data: cardManager.getShowdownInfo(game)});
+            response({success: "1", message: "", data: cardManager.getExposeInfo(game)});
         } else {
             response({success: "0", message: "游戏信息异常，请稍后再试", data});
         }
@@ -385,7 +385,7 @@ global.io.on('connection', function (socket) {
         response({success: "1", message: "", data: {}});
     });
 
-    socket.on('showdown', function (selectedCard, response) {
+    socket.on('expose', function (selectedCard, response) {
         let onlineUser = userManager.getCurrentUser(socket.id);
         if (!onlineUser) {
             response({success: "0", message: "账号异常，请稍后再试"});
@@ -404,7 +404,7 @@ global.io.on('connection', function (socket) {
             return;
         }
 
-        if (!gameManager.showdown(game, onlineUser.unionId, selectedCard)) {
+        if (!gameManager.expose(game, onlineUser.unionId, selectedCard)) {
             response({success: "0", message: "游戏数据异常，请稍后再试"});
             return;
         }

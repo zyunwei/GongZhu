@@ -111,8 +111,8 @@ const net = function () {
         });
     }
 
-    that.getShowdownInfo = function(roomNo, callback){
-        that.socket.emit('getShowdownInfo', roomNo, function (data) {
+    that.getExposeInfo = function(roomNo, callback){
+        that.socket.emit('getExposeInfo', roomNo, function (data) {
             callback(data);
         });
     }
@@ -123,8 +123,8 @@ const net = function () {
         });
     }
 
-    that.showdown  = function(selectedCard, callback){
-        that.socket.emit('showdown', selectedCard, function (data) {
+    that.expose  = function(selectedCard, callback){
+        that.socket.emit('expose', selectedCard, function (data) {
             callback(data);
         });
     }

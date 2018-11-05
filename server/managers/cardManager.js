@@ -2,16 +2,16 @@ import global from "../global";
 import gameManager from "./gameManager";
 
 const cardManager = {
-    getShowdownInfo(game) {
-        let showdowns = [];
+    getExposeInfo(game) {
+        let exposes = [];
         for (let i = 0; i < game.players.length; i++) {
-            showdowns.push({
+            exposes.push({
                 unionId: game.players[i].unionId,
-                isShowdown: game.players[i].isShowdown,
-                showdownCards: game.showdownCards[i]
+                isExpose: game.players[i].isExpose,
+                exposeCards: game.exposeCards[i]
             });
         }
-        return showdowns;
+        return exposes;
     },
     getAllCard() {
         // 获得所有牌
@@ -275,17 +275,17 @@ const cardManager = {
             return {success: "0", message: "必须出相同花色"}
         }
 
-        let showdownCards = [];
-        for (let showdown of game.showdownCards) {
-            for (let card of showdown) {
-                showdownCards.push(card);
+        let exposeCards = [];
+        for (let expose of game.exposeCards) {
+            for (let card of expose) {
+                exposeCards.push(card);
             }
         }
 
-        let isShowdownCard = false;
-        for (let showdown of showdownCards) {
-            if (showdown.suit === selectedCard.suit && showdown.number === selectedCard.number) {
-                isShowdownCard = true;
+        let isExposeCard = false;
+        for (let expose of exposeCards) {
+            if (expose.suit === selectedCard.suit && expose.number === selectedCard.number) {
+                isExposeCard = true;
                 break;
             }
         }
@@ -293,7 +293,7 @@ const cardManager = {
         let isFirstRound = game.suitPlayStatus[selectedCard.suit] === 0;
 
         // 花色首轮不能出卖过的牌,除非只剩下一张
-        if (!firstSuit && isFirstRound && isShowdownCard && myCards.length > 1) {
+        if (!firstSuit && isFirstRound && isExposeCard && myCards.length > 1) {
             switch (selectedCard.suit) {
                 case 'spade':
                     if (selectedCard.number === 12) {
@@ -319,7 +319,7 @@ const cardManager = {
         }
 
         // 花色首轮不能跟亮过的牌，但只有一张时可以跟
-        if (firstSuit && isFirstRound && isShowdownCard) {
+        if (firstSuit && isFirstRound && isExposeCard) {
             let sameSuitCount = 0;
             for (let card of myCards) {
                 if (card.suit === firstSuit) {
@@ -365,35 +365,35 @@ const cardManager = {
         }
         return count >= 16;
     },
-    checkShowdown(game) {
+    checkExpose(game) {
         // 检查亮牌数，亮3张时必须全亮四张
-        let showdownCards = [];
-        for (let showdown of game.showdownCards) {
-            for (let card of showdown) {
-                showdownCards.push(card);
+        let exposeCards = [];
+        for (let expose of game.exposeCards) {
+            for (let card of expose) {
+                exposeCards.push(card);
             }
         }
 
-        if (showdownCards.length === 3) {
+        if (exposeCards.length === 3) {
             for (let i = 0; i < game.players.length; i++) {
                 for (let card of game.players[i].cards) {
                     if (card.ex === 'point' && card.number === 1 ||
                         card.ex === 'pig' || card.ex === 'sheep' || card.ex === 'double') {
-                        let needShowdown = true;
-                        for (let showdown of showdownCards) {
-                            if (showdown.suit === card.suit && showdown.number === card.number) {
-                                needShowdown = false;
+                        let needExpose = true;
+                        for (let expose of exposeCards) {
+                            if (expose.suit === card.suit && expose.number === card.number) {
+                                needExpose = false;
                             }
                         }
 
-                        if (needShowdown) {
-                            game.showdownCards[i].push({
+                        if (needExpose) {
+                            game.exposeCards[i].push({
                                 suit: card.suit,
                                 number: card.number
                             });
                             global.io.in("room" + game.roomNo).emit("notify", {
-                                type: "updateShowdown",
-                                data: this.getShowdownInfo(game)
+                                type: "updateExpose",
+                                data: this.getExposeInfo(game)
                             });
                             break;
                         }
@@ -405,24 +405,24 @@ const cardManager = {
     getFinalScore(game) {
         let gameScore = [0, 0, 0, 0];
 
-        let isShowdownHeart = false; // 卖红桃
-        let isShowdownPig = false; // 卖猪
-        let isShowdownSheep = false; // 卖羊
-        let isShowdownDouble = false; // 卖变压器
+        let isExposeHeart = false; // 卖红桃
+        let isExposePig = false; // 卖猪
+        let isExposeSheep = false; // 卖羊
+        let isExposeDouble = false; // 卖变压器
 
-        for (let showdown of game.showdownCards) {
-            for (let card of showdown) {
+        for (let expose of game.exposeCards) {
+            for (let card of expose) {
                 if (card.suit === 'heart' && card.number === 1) {
-                    isShowdownHeart = true;
+                    isExposeHeart = true;
                 }
                 else if (card.suit === 'spade' && card.number === 12) {
-                    isShowdownPig = true;
+                    isExposePig = true;
                 }
                 else if (card.suit === 'diamond' && card.number === 11) {
-                    isShowdownSheep = true;
+                    isExposeSheep = true;
                 }
                 else if (card.suit === 'club' && card.number === 10) {
-                    isShowdownDouble = true;
+                    isExposeDouble = true;
                 }
             }
         }
@@ -455,7 +455,7 @@ const cardManager = {
                 if (game.pointCards[i][j].ex === 'point') {
                     if (isAllInHeart) {
                         // 全收红桃
-                        if (isShowdownHeart) {
+                        if (isExposeHeart) {
                             gameScore[i] += Math.abs(game.pointCards[i][j].point) * 2;
                         }
                         else {
@@ -464,7 +464,7 @@ const cardManager = {
                     }
                     else {
                         // 没有全收
-                        if (isShowdownHeart) {
+                        if (isExposeHeart) {
                             gameScore[i] += game.pointCards[i][j].point * 2;
                         }
                         else {
@@ -480,7 +480,7 @@ const cardManager = {
 
                     // 全收
                     if (isAllIn) {
-                        if (isShowdownPig) {
+                        if (isExposePig) {
                             gameScore[i] += Math.abs(game.pointCards[i][j].point) * 2;
                         }
                         else {
@@ -488,7 +488,7 @@ const cardManager = {
                         }
                     }
                     else {
-                        if (isShowdownPig) {
+                        if (isExposePig) {
                             gameScore[i] += game.pointCards[i][j].point * 2;
                         }
                         else {
@@ -496,7 +496,7 @@ const cardManager = {
                         }
                     }
                 } else if (game.pointCards[i][j].ex === 'sheep') {
-                    if (isShowdownSheep) {
+                    if (isExposeSheep) {
                         gameScore[i] += game.pointCards[i][j].point * 2;
                     }
                     else {
@@ -512,7 +512,7 @@ const cardManager = {
                 if (game.pointCards[i][j].ex === 'double') {
                     if (gameScore[i] === 0) {
                         // 只得变压器
-                        if (isShowdownDouble) {
+                        if (isExposeDouble) {
                             gameScore[i] += game.pointCards[i][j].point * 2;
                         }
                         else {
@@ -520,7 +520,7 @@ const cardManager = {
                         }
                     } else {
                         // 有其他分
-                        if (isShowdownDouble) {
+                        if (isExposeDouble) {
                             gameScore[i] = gameScore[i] * 4;
                         }
                         else {
