@@ -14,7 +14,7 @@ cc.Class({
     },
     onLoad() {
         this.schedule(function () {
-            if(global.lobbyNeedUpdate === 1){
+            if (global.lobbyNeedUpdate === 1) {
                 this.updateInfo();
             }
         }, 0.3);
@@ -34,7 +34,7 @@ cc.Class({
             for (let i = 1; i <= 20; i++) {
                 let roomBoxPrefab = cc.instantiate(prefab);
                 let roomBox = roomBoxPrefab.getComponent("roomBox");
-                roomBox.init("", "", "");
+                roomBox.init(global, "", "", "");
                 roomBoxPrefab.active = false;
                 self.roomLayout.node.addChild(roomBoxPrefab);
                 self.roomBoxList.push(roomBoxPrefab);
@@ -78,7 +78,7 @@ cc.Class({
                 result.data.rooms.forEach(function (e, i) {
                     let roomIndex = (e.no - 1) % 20;
                     let roomBox = self.roomBoxList[roomIndex].getComponent("roomBox");
-                    roomBox.init(e.no, e.players.length, e.status);
+                    roomBox.init(global, e.no, e.players.length, e.status);
                     self.roomBoxList[roomIndex].active = true;
                 });
                 self.setButton(true);

@@ -6,8 +6,10 @@ cc.Class({
         PlayerCount: cc.Label,
         Status: cc.Label,
         RoomNumber: 0,
+        global: null,
     },
-    init(roomNo, playerCount, status) {
+    init(global, roomNo, playerCount, status) {
+        this.global = global;
         this.RoomNumber = roomNo;
         let padToFour = roomNo <= 9999 ? ("000" + roomNo).slice(-4) : roomNo;
         this.RoomNo.string = padToFour;
@@ -33,9 +35,10 @@ cc.Class({
 
     },
     enterRoom: function (event, data) {
-        global.net.joinRoom(this.RoomNumber ,function(result){
+        let self = this;
+        self.global.net.joinRoom(this.RoomNumber ,function(result){
             if (result.success === "1") {
-                global.roomNo = result.data;
+                self.global.roomNo = result.data;
                 cc.director.loadScene("game");
             } else {
                 utils.messageBox("失败", result.message, function () {

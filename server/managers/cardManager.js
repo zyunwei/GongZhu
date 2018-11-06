@@ -19,7 +19,7 @@ const cardManager = {
         let suits = ['spade', 'heart', 'diamond', 'club'];
         for (let i = 1; i <= 13; i++) {
             for (let suit of suits) {
-                if (i < 9 && suit !== 'heart') continue; // 加速测试，每人7张
+                //if (i < 9 && suit !== 'heart') continue; // 加速测试，每人7张
 
                 let cardInfo = {number: i, suit: suit, point: 0, ex: ''};
 
