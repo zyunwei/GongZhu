@@ -1032,6 +1032,10 @@
     },
     "unionId": "",
     "countdownNumber": -1,
+    "headImage": {
+      "__id__": 4
+    },
+    "headImageUrl": "",
     "_id": ""
   },
   {

@@ -41,8 +41,8 @@
     },
     "_scale": {
       "__type__": "cc.Vec3",
-      "x": 0.7583333333333333,
-      "y": 0.7583333333333333,
+      "x": 0.7518446180555556,
+      "y": 0.7518446180555556,
       "z": 1
     },
     "_quat": {
@@ -515,7 +515,7 @@
     },
     "_fillStart": 0,
     "_fillRange": 0,
-    "_isTrimmedMode": true,
+    "_isTrimmedMode": false,
     "_state": 0,
     "_atlas": null,
     "_id": "9aUijvCjNOupVa/AUvKiga"
@@ -2549,6 +2549,9 @@
       "__id__": 29
     },
     "roomBoxList": [],
+    "headImage": {
+      "__id__": 10
+    },
     "_id": "00Brkm5xxDgJRwIQBhdWeH"
   }
 ]

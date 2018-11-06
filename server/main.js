@@ -108,7 +108,8 @@ global.io.on('connection', function (socket) {
                     unionId: result.unionId,
                     nickName: result.nickName,
                     gold: result.gold,
-                    socketId: socket.id
+                    socketId: socket.id,
+                    avatarUrl: result.avatarUrl
                 };
                 if (!userManager.checkOnlineUser(onlineUser)) {
                     response("failed");
@@ -281,7 +282,8 @@ global.io.on('connection', function (socket) {
                     isOnline: user.isOnline,
                     gold: user.gold,
                     nickName: user.nickName,
-                    status: user.status
+                    status: user.status,
+                    avatarUrl: user.avatarUrl
                 });
             }
             break;

@@ -14,7 +14,7 @@ global.testUserInfo1 ={
     city: 'shijiazhuang',
     province: 'hebei',
     country: 'china',
-    avatarUrl: 'https://www.google.com',
+    avatarUrl: 'https://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTJiahgiafuMPYEN34QKf5dfZQYGAWexRE0W4ZcG7GI92Tb43bXLCnJDLz8vEzFyVSWBA4fYbNCakDJg/132',
 };
 
 global.testUserInfo2 ={
@@ -24,7 +24,7 @@ global.testUserInfo2 ={
     city: 'taiyuan',
     province: 'shanxi',
     country: 'china',
-    avatarUrl: 'https://www.google.com',
+    avatarUrl: 'https://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTJiahgiafuMPYEN34QKf5dfZQYGAWexRE0W4ZcG7GI92Tb43bXLCnJDLz8vEzFyVSWBA4fYbNCakDJg/132',
 };
 
 global.testUserInfo3 ={
@@ -34,7 +34,7 @@ global.testUserInfo3 ={
     city: 'haidian',
     province: 'beijing',
     country: 'china',
-    avatarUrl: 'https://www.google.com',
+    avatarUrl: 'https://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTJiahgiafuMPYEN34QKf5dfZQYGAWexRE0W4ZcG7GI92Tb43bXLCnJDLz8vEzFyVSWBA4fYbNCakDJg/132',
     updateTime: '',
     updateIp: ''
 };
@@ -46,7 +46,7 @@ global.testUserInfo4 ={
     city: 'changde',
     province: 'hunan',
     country: 'china',
-    avatarUrl: 'https://www.google.com',
+    avatarUrl: 'https://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTJiahgiafuMPYEN34QKf5dfZQYGAWexRE0W4ZcG7GI92Tb43bXLCnJDLz8vEzFyVSWBA4fYbNCakDJg/132',
 };
 
 global.testUserInfo5 ={
@@ -56,7 +56,7 @@ global.testUserInfo5 ={
     city: 'haikou',
     province: 'hainan',
     country: 'china',
-    avatarUrl: 'https://www.google.com',
+    avatarUrl: 'https://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTJiahgiafuMPYEN34QKf5dfZQYGAWexRE0W4ZcG7GI92Tb43bXLCnJDLz8vEzFyVSWBA4fYbNCakDJg/132',
 };
 
 

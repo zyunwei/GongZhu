@@ -10,7 +10,8 @@ cc.Class({
         onlineCount: cc.Label,
         currentPage: 1,
         roomLayout: cc.Layout,
-        roomBoxList: []
+        roomBoxList: [],
+        headImage: cc.Sprite
     },
     onLoad() {
         this.schedule(function () {
@@ -65,6 +66,18 @@ cc.Class({
         global.net.getLobbyInfo(this.currentPage, function (result) {
             if (result.success === "1") {
                 global.loginInfo = result.data.loginInfo;
+                if (global.loginInfo && global.loginInfo.avatarUrl) {
+                    cc.loader.load({
+                        url: global.loginInfo.avatarUrl,
+                        type: 'jpg'
+                    }, (err, tex) => {
+                        if (!err) {
+                            self.headImage.spriteFrame = new cc.SpriteFrame(tex);
+                            self.headImage.node.scale = 61 / tex.width;
+                        }
+                    });
+                }
+
                 self.nickname.string = global.loginInfo.nickName;
                 self.gold.string = global.loginInfo.gold;
                 self.roomCount.string = "房间数：" + result.data.roomCount;

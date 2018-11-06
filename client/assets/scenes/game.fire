@@ -41,8 +41,8 @@
     },
     "_scale": {
       "__type__": "cc.Vec3",
-      "x": 0.7583333333333333,
-      "y": 0.7583333333333333,
+      "x": 0.8879229764588992,
+      "y": 0.8879229764588992,
       "z": 1
     },
     "_quat": {
@@ -1655,6 +1655,10 @@
     },
     "unionId": "",
     "countdownNumber": -1,
+    "headImage": {
+      "__id__": 17
+    },
+    "headImageUrl": "",
     "_id": "3dru3dLllEMKlfHrlzv8nS"
   },
   {
@@ -2722,6 +2726,10 @@
     },
     "unionId": "",
     "countdownNumber": -1,
+    "headImage": {
+      "__id__": 48
+    },
+    "headImageUrl": "",
     "_id": "47fPwULUBMi5smTcNV2Htp"
   },
   {
@@ -3789,6 +3797,10 @@
     },
     "unionId": "",
     "countdownNumber": -1,
+    "headImage": {
+      "__id__": 79
+    },
+    "headImageUrl": "",
     "_id": "a5BCWjG7xJJbLvK7oohtFE"
   },
   {
@@ -4856,6 +4868,10 @@
     },
     "unionId": "",
     "countdownNumber": -1,
+    "headImage": {
+      "__id__": 110
+    },
+    "headImageUrl": "",
     "_id": "46TtOpHsdPPrWQ/HYvBe9O"
   },
   {

@@ -162,7 +162,8 @@ const userManager = {
                         gold: userInfo.gold,
                         status: 0,
                         isOnline: 1,
-                        socketId: userInfo.socketId
+                        socketId: userInfo.socketId,
+                        avatarUrl: userInfo.avatarUrl
                     });
                 return true;
             }
