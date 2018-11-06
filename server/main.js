@@ -3,10 +3,38 @@ import userManager from './managers/userManager';
 import gameManager from './managers/gameManager';
 import cardManager from "./managers/cardManager";
 
-const io = require('socket.io')(3000);
+const app = require('express')();
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+
+server.listen(3000);
 
 global.io = io;
 global.logger.info("服务器已启动");
+
+app.get('/', function (req, res) {
+    res.json({test: 'hello world!'})
+});
+
+const qs = require('querystring');
+const request = require('request');
+
+app.get('/wechatlogin', function (req, res) {
+    let data = {
+        appid: 'wx87a9abfd86215c9d',
+        secret: '7940973dfa0bf53c7645205395edc1fe',
+        js_code: req.query.code,
+        grant_type: 'authorization_code'
+    };
+    let content = qs.stringify(data);
+    let url = 'https://api.weixin.qq.com/sns/jscode2session?' + content;
+
+    request.get({'url': url}, (error, response, body) => {
+        let responseBody = JSON.parse(body);
+        console.log(responseBody);
+        res.json(responseBody)
+    });
+});
 
 // 服务端倒计时控制
 setInterval(function () {
