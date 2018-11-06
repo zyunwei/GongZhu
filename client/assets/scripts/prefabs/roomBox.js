@@ -1,6 +1,3 @@
-import global from "./global";
-import utils from "./utils";
-
 cc.Class({
     extends: cc.Component,
 
@@ -8,8 +5,8 @@ cc.Class({
         RoomNo: cc.Label,
         PlayerCount: cc.Label,
         Status: cc.Label,
+        RoomNumber: 0,
     },
-    RoomNumber: 0,
     init(roomNo, playerCount, status) {
         this.RoomNumber = roomNo;
         let padToFour = roomNo <= 9999 ? ("000" + roomNo).slice(-4) : roomNo;
